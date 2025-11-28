@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
+import { environment } from '../../environments/environment';
 
 declare var google: any;
 
@@ -40,7 +41,7 @@ export class LoginComponent implements AfterViewInit {
       return;
     }
     google.accounts.id.initialize({
-      client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Placeholder
+      client_id: environment.googleClientId,
       callback: this.handleGoogleSignIn.bind(this),
     });
     

@@ -5,6 +5,7 @@ import { Transaction, Category, InstallmentPlan, MonthlyView } from '../models/t
 import { Observable, tap, forkJoin, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NotificationService } from './notification.service';
+import { environment } from '../environments/environment';
 
 // Fix: Removed local MonthlyView interface definition
 @Injectable({
@@ -14,7 +15,7 @@ export class DataService {
   // Fix: Explicitly type the injected HttpClient to resolve property access errors.
   private http: HttpClient = inject(HttpClient);
   private notificationService = inject(NotificationService);
-  private apiUrl = '/api/v1/financial';
+  private apiUrl = `${environment.apiUrl}/financial`;
 
   private categories = signal<Category[]>([]);
   private installmentPlans = signal<InstallmentPlan[]>([]);

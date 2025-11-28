@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { NotificationService } from './notification.service';
+import { environment } from '../environments/environment';
 
 const AUTH_TOKEN_KEY = 'myfin_auth_token';
 
@@ -15,7 +16,7 @@ export class AuthService {
   private http: HttpClient = inject(HttpClient);
   private router = inject(Router);
   private notificationService = inject(NotificationService);
-  private apiUrl = '/api/v1/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   private token = signal<string | null>(localStorage.getItem(AUTH_TOKEN_KEY));
 

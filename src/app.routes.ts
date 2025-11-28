@@ -6,6 +6,7 @@ import { InitialDashboardComponent } from './components/initial-dashboard/initia
 import { FinancialHomeComponent } from './components/financial-home/financial-home.component';
 import { ShoppingHomeComponent } from './components/shopping-home/shopping-home.component';
 import { MainLayoutComponent } from './components/main-layout/main-layout.component';
+import { initialDataResolver } from './app.resolver';
 
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
@@ -27,6 +28,9 @@ export const routes: Routes = [
         path: '',
         component: MainLayoutComponent,
         canActivate: [authGuard],
+        resolve: {
+          initialData: initialDataResolver
+        },
         children: [
             { path: 'dashboard', component: InitialDashboardComponent },
             { 

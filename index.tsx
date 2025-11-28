@@ -7,14 +7,14 @@ import { AppComponent } from './src/app.component';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { routes } from './src/app.routes';
-import { mockApiInterceptor } from './src/services/mock-api.interceptor';
+import { authInterceptor } from './src/services/auth.interceptor';
 
 registerLocaleData(localePt);
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideZonelessChangeDetection(),
-    provideHttpClient(withInterceptors([mockApiInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(routes, withHashLocation()),
     { provide: LOCALE_ID, useValue: 'pt' },
   ],
