@@ -93,7 +93,7 @@
                   }
                 <div class="min-w-0">
                   <p class="font-semibold text-neutral-800 truncate">{{ transaction.description }}</p>
-                  <p class="text-sm text-neutral-500 truncate">{{ getCategoryName(transaction.categoryId) }} &middot; {{ transaction.date | date:'dd/MM/y':'':'pt' }}</p>
+                  <p class="text-sm text-neutral-500 truncate">{{ getCategoryName(transaction.category_id) }} &middot; {{ transaction.date | date:'dd/MM/y':'':'pt' }}</p>
                 </div>
               </div>
               <div class="flex items-center ml-4 flex-shrink-0">

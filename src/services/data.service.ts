@@ -1,7 +1,7 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 // Fix: Import MonthlyView from the model file
-import { Transaction, Category, InstallmentPlan, MonthlyView } from '../models/transaction.model';
+import { Transaction, Category, InstallmentPlan, MonthlyView, CategoryResponse, InstallmentPlanResponse } from '../models/transaction.model';
 import { Observable, tap, forkJoin, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NotificationService } from './notification.service';
@@ -32,19 +32,20 @@ export class DataService {
   
   loadInitialData(): Observable<any> {
     return forkJoin({
-      categories: this.http.get<Category[]>(`${this.apiUrl}/categories`),
-      installmentPlans: this.http.get<InstallmentPlan[]>(`${this.apiUrl}/summary/installment-plans`),
+      categories: this.http.get<CategoryResponse>(`${this.apiUrl}/categories`),
+      installmentPlans: this.http.get<InstallmentPlanResponse>(`${this.apiUrl}/summary/installment-plans`),
     }).pipe(
       tap(data => {
-        this.categories.set(data.categories);
-        this.installmentPlans.set(data.installmentPlans);
+        console.log(data);
+        this.categories.set(data.categories.categories);
+        this.installmentPlans.set(data.installmentPlans.installmentPlans);
       })
     );
   }
   
-  refreshInstallmentPlans(): Observable<InstallmentPlan[]> {
-    return this.http.get<InstallmentPlan[]>(`${this.apiUrl}/summary/installment-plans`).pipe(
-        tap(plans => this.installmentPlans.set(plans))
+  refreshInstallmentPlans(): Observable<InstallmentPlanResponse> {
+    return this.http.get<InstallmentPlanResponse>(`${this.apiUrl}/summary/installment-plans`).pipe(
+        tap(plans => this.installmentPlans.set(plans.installmentPlans))
     );
   }
 

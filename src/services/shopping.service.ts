@@ -2,7 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin, of, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
-import { CartItem, ShoppingCategory, ShoppingList, Product } from '../models/shopping.model';
+import { CartItem, ShoppingCategory, ShoppingList, Product, ShoppingListResponse, ShoppingCategoryResponse, ProductResponse } from '../models/shopping.model';
 import { NotificationService } from './notification.service';
 import { environment } from '../environments/environment';
 
@@ -31,14 +31,14 @@ export class ShoppingService {
 
   loadInitialData(): Observable<any> {
     return forkJoin({
-      lists: this.http.get<ShoppingList[]>(`${this.apiUrl}/lists`),
-      categories: this.http.get<ShoppingCategory[]>(`${this.apiUrl}/categories`),
-      products: this.http.get<Product[]>(`${this.apiUrl}/products`),
+      lists: this.http.get<ShoppingListResponse>(`${this.apiUrl}/lists`),
+      categories: this.http.get<ShoppingCategoryResponse>(`${this.apiUrl}/categories`),
+      products: this.http.get<ProductResponse>(`${this.apiUrl}/products`),
     }).pipe(
       tap(data => {
-        this.shoppingLists.set(data.lists);
-        this.shoppingCategories.set(data.categories);
-        this.products.set(data.products);
+        this.shoppingLists.set(data.lists.lists);
+        this.shoppingCategories.set(data.categories.categories);
+        this.products.set(data.products.products);
       }),
       catchError(() => {
         this.notificationService.show('Erro ao carregar dados de compras.', 'error');

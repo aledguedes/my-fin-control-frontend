@@ -22,9 +22,9 @@ export class ShoppingHomeComponent implements OnInit {
   productUnits = productUnits;
   view = signal<'dashboard' | 'categories' | 'products'>('dashboard');
   isCreateListModalOpen = signal(false);
-  editingCategoryId = signal<string | null>(null);
+  editingcategory_id = signal<string | null>(null);
   editingProductId = signal<string | null>(null);
-  expandedCategoryIds = signal<string[]>([]);
+  expandedcategory_ids = signal<string[]>([]);
   preSelectedProductIds = signal<string[]>([]);
   
   // Loading states
@@ -40,8 +40,8 @@ export class ShoppingHomeComponent implements OnInit {
     return this.shoppingService.shoppingLists().slice().sort((a, b) => {
       if (a.status === 'pending' && b.status === 'completed') return -1;
       if (a.status === 'completed' && b.status === 'pending') return 1;
-      const dateA = new Date(a.completedAt || a.createdAt).getTime();
-      const dateB = new Date(b.completedAt || b.createdAt).getTime();
+      const dateA = new Date(a.completedAt || a.created_at).getTime();
+      const dateB = new Date(b.completedAt || b.created_at).getTime();
       return dateB - dateA;
     });
   });
@@ -51,7 +51,7 @@ export class ShoppingHomeComponent implements OnInit {
       const categories = this.shoppingService.shoppingCategories();
       const grouped = categories.map(cat => ({
           ...cat,
-          products: products.filter(p => p.categoryId === cat.id).sort((a,b) => a.name.localeCompare(b.name))
+          products: products.filter(p => p.category_id === cat.id).sort((a,b) => a.name.localeCompare(b.name))
       }));
       return grouped.filter(g => g.products.length > 0);
   });
@@ -61,14 +61,14 @@ export class ShoppingHomeComponent implements OnInit {
     this.categoryForm = this.fb.group({ name: ['', Validators.required] });
     this.productForm = this.fb.group({
       name: ['', Validators.required],
-      categoryId: [null],
+      category_id: [null],
       unit: ['un' as ProductUnit, Validators.required],
     });
     this.editCategoryForm = this.fb.group({ name: ['', Validators.required] });
     this.editProductForm = this.fb.group({
       id: [''],
       name: ['', Validators.required],
-      categoryId: [null],
+      category_id: [null],
       unit: ['un' as ProductUnit, Validators.required],
     });
   }
@@ -99,16 +99,16 @@ export class ShoppingHomeComponent implements OnInit {
     return this.preSelectedProductIds().includes(productId);
   }
 
-  isCategoryExpanded(categoryId: string): boolean {
-    return this.expandedCategoryIds().includes(categoryId);
+  isCategoryExpanded(category_id: string): boolean {
+    return this.expandedcategory_ids().includes(category_id);
   }
 
-  toggleCategory(categoryId: string): void {
-    this.expandedCategoryIds.update(ids => {
-      if (ids.includes(categoryId)) {
-        return ids.filter(id => id !== categoryId);
+  toggleCategory(category_id: string): void {
+    this.expandedcategory_ids.update(ids => {
+      if (ids.includes(category_id)) {
+        return ids.filter(id => id !== category_id);
       } else {
-        return [...ids, categoryId];
+        return [...ids, category_id];
       }
     });
   }
@@ -185,10 +185,10 @@ export class ShoppingHomeComponent implements OnInit {
   }
 
   startEditCategory(category: ShoppingCategory): void {
-    this.editingCategoryId.set(category.id);
+    this.editingcategory_id.set(category.id);
     this.editCategoryForm.setValue({ name: category.name });
   }
-  cancelEditCategory(): void { this.editingCategoryId.set(null); }
+  cancelEditCategory(): void { this.editingcategory_id.set(null); }
 
   saveCategory(id: string): void {
     if (this.editCategoryForm.invalid) return;
@@ -206,7 +206,7 @@ export class ShoppingHomeComponent implements OnInit {
     this.loadingAction.set('add-product');
     this.shoppingService.addProduct(this.productForm.value).pipe(
       finalize(() => this.loadingAction.set(null))
-    ).subscribe(() => this.productForm.reset({ unit: 'un', categoryId: null }));
+    ).subscribe(() => this.productForm.reset({ unit: 'un', category_id: null }));
   }
   
   deleteProduct(id: string): void {
@@ -223,7 +223,7 @@ export class ShoppingHomeComponent implements OnInit {
     this.editProductForm.setValue({
       id: product.id,
       name: product.name,
-      categoryId: product.categoryId ?? null,
+      category_id: product.category_id ?? null,
       unit: product.unit
     });
   }

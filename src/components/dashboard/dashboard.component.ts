@@ -48,8 +48,8 @@ export class DashboardComponent {
     this.currentDate.set(new Date(year, month - 1, 2));
   }
 
-  getCategoryName(categoryId: string): string {
-    return this.dataService.getCategoryById(categoryId)?.name ?? 'Sem Categoria';
+  getCategoryName(category_id: string): string {
+    return this.dataService.getCategoryById(category_id)?.name ?? 'Sem Categoria';
   }
 
   trackById(index: number, item: Transaction): string {
