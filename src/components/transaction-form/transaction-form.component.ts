@@ -45,7 +45,7 @@ export class TransactionFormComponent implements OnInit {
       type: [data?.type ?? 'expense', Validators.required],
       description: [data?.description ?? '', Validators.required],
       amount: [data?.amount ?? null, !isInstallment ? Validators.required : null],
-      category_id: [data?.category_id ?? null, Validators.required],
+      categoryId: [data?.categoryId ?? null, Validators.required],
       paymentMethod: [data?.paymentMethod ?? 'Débito', Validators.required],
       transactionDate: [data?.transactionDate ?? new Date().toISOString().split('T')[0], Validators.required],
       isInstallment: [isInstallment],
@@ -62,7 +62,7 @@ export class TransactionFormComponent implements OnInit {
 
   private setupFormListeners(): void {
     this.transactionForm.get('type')?.valueChanges.subscribe(type => {
-      this.transactionForm.get('category_id')?.reset();
+      this.transactionForm.get('categoryId')?.reset();
       if (type === 'revenue') {
         this.transactionForm.patchValue({ isInstallment: false, isRecurrent: false, paymentMethod: 'Transferência' });
       } else {
@@ -129,7 +129,7 @@ export class TransactionFormComponent implements OnInit {
       amount: formValue.amount,
       transactionDate: formValue.transactionDate,
       description: formValue.description,
-      category_id: formValue.category_id,
+      categoryId: formValue.categoryId,
       paymentMethod: formValue.paymentMethod,
       isInstallment: formValue.isInstallment,
       isRecurrent: formValue.isRecurrent,

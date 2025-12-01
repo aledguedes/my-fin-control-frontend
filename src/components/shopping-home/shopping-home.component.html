@@ -72,7 +72,7 @@
                           @if(list.status === 'completed') {
                             Finalizada em: {{ list.completedAt | date:'dd/MM/yyyy' }}
                           } @else {
-                            Criada em: {{ list.created_at | date:'dd/MM/yyyy' }}
+                            Criada em: {{ list.createdAt | date:'dd/MM/yyyy' }}
                           }
                         </p>
                       </div>
@@ -85,7 +85,7 @@
                         }
                         
                         <div class="flex items-center gap-2">
-                           @if(list.status === 'andamento') {
+                           @if(list.status === 'pending') {
                             <button (click)="selectList(list.id)" class="py-2 px-4 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium">
                               Abrir
                             </button>
@@ -144,7 +144,7 @@
             <ul class="divide-y divide-neutral-200">
               @for(category of shoppingService.shoppingCategories(); track category.id) {
                 <li class="p-4">
-                  @if (editingcategory_id() === category.id) {
+                  @if (editingCategoryId() === category.id) {
                     <form [formGroup]="editCategoryForm" (ngSubmit)="saveCategory(category.id)" class="flex items-center gap-3">
                       <input type="text" formControlName="name" class="flex-grow block w-full rounded-md border-neutral-300 shadow-sm py-2 px-3">
                       <button type="submit" [disabled]="editCategoryForm.invalid || loadingAction() === 'save-category-' + category.id" class="py-2 px-3 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300">
@@ -188,7 +188,7 @@
                </div>
                <div>
                  <label for="newProductCategory" class="block text-sm font-medium text-neutral-700">Categoria</label>
-                 <select id="newProductCategory" formControlName="category_id" class="mt-1 block w-full rounded-md border-neutral-300 shadow-sm py-2 px-3">
+                 <select id="newProductCategory" formControlName="categoryId" class="mt-1 block w-full rounded-md border-neutral-300 shadow-sm py-2 px-3">
                    <option [ngValue]="null">Sem Categoria</option>
                    @for(cat of shoppingService.shoppingCategories(); track cat.id) { <option [value]="cat.id">{{cat.name}}</option> }
                  </select>
@@ -233,7 +233,7 @@
                               @if (editingProductId() === product.id) {
                                 <form [formGroup]="editProductForm" (ngSubmit)="saveProduct()" class="flex flex-wrap items-center gap-3">
                                   <input type="text" formControlName="name" class="flex-grow min-w-[200px] block w-full sm:w-auto rounded-md border-neutral-300 shadow-sm py-2 px-3">
-                                  <select formControlName="category_id" class="rounded-md border-neutral-300 shadow-sm py-2 px-3">
+                                  <select formControlName="categoryId" class="rounded-md border-neutral-300 shadow-sm py-2 px-3">
                                     <option [ngValue]="null">Sem Categoria</option>
                                     @for(cat of shoppingService.shoppingCategories(); track cat.id) { <option [value]="cat.id">{{cat.name}}</option> }
                                   </select>

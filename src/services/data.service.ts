@@ -1,7 +1,6 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-// Fix: Import MonthlyView from the model file
-import { Transaction, Category, InstallmentPlan, MonthlyView, CategoryResponse, InstallmentPlanResponse } from '../models/transaction.model';
+import { Transaction, FinancialCategory, InstallmentPlan, MonthlyView } from '../models/transaction.model';
 import { Observable, tap, forkJoin, throwError } from 'rxjs';
 // FIX: Import `map` operator from rxjs.
 import { catchError, map } from 'rxjs/operators';
@@ -31,20 +30,21 @@ export class DataService {
   
   loadInitialData(): Observable<any> {
     return forkJoin({
-      categories: this.http.get<CategoryResponse>(`${this.apiUrl}/categories`),
-      installmentPlans: this.http.get<InstallmentPlanResponse>(`${this.apiUrl}/summary/installment-plans`),
+      categories: this.http.get<{categories: FinancialCategory[]}>(`${this.apiUrl}/categories`),
+      installmentPlans: this.http.get<{installmentPlans: InstallmentPlan[]}>(`${this.apiUrl}/summary/installment-plans`),
     }).pipe(
       tap(data => {
-        console.log(data);
         this.categories.set(data.categories.categories);
         this.installmentPlans.set(data.installmentPlans.installmentPlans);
       })
     );
   }
   
-  refreshInstallmentPlans(): Observable<InstallmentPlanResponse> {
-    return this.http.get<InstallmentPlanResponse>(`${this.apiUrl}/summary/installment-plans`).pipe(
-        tap(plans => this.installmentPlans.set(plans.installmentPlans))
+  refreshInstallmentPlans(): Observable<InstallmentPlan[]> {
+    // FIX: Use `map` to transform the stream to match the return type, which fixes the type inference for `data` in `tap`.
+    return this.http.get<{installmentPlans: InstallmentPlan[]}>(`${this.apiUrl}/summary/installment-plans`).pipe(
+        tap(data => this.installmentPlans.set(data.installmentPlans)),
+        map(data => data.installmentPlans)
     );
   }
 

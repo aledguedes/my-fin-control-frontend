@@ -1,13 +1,9 @@
-export interface CategoryResponse {
-  categories: Category[];
-}
-
-export interface Category {
+export interface FinancialCategory {
   id: string;
   name: string;
   type: 'revenue' | 'expense';
   userId?: string;
-  created_at?: string;
+  createdAt?: string;
   updatedAt?: string;
 }
 
@@ -25,13 +21,13 @@ export interface Transaction {
   amount: number; // Total amount for installments
   transactionDate: string; // YYYY-MM-DD
   description: string;
-  category_id: string;
+  categoryId: string;
   paymentMethod: PaymentMethod;
   isInstallment: boolean;
   isRecurrent?: boolean;
   installments?: InstallmentDetails;
   userId?: string;
-  created_at?: string;
+  createdAt?: string;
   updatedAt?: string;
   recurrenceStartDate?: string;
   totalInstallments?: number;

@@ -7,58 +7,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# ============================================
-# Angular Build Outputs
-# ============================================
-dist/
-dist-ssr/
-/out-tsc/
-.angular/
-/bazel-out/
-
-# ============================================
-# Environment & Configuration
-# ============================================
 node_modules
 dist
 dist-ssr
 *.local
-.env
-.env.local
-.env.*.local
-/src/environments/environment.local.ts
 
-# ============================================
-# Logs
-# ============================================
-logs/
-*.log
-
-# ============================================
-# OS Files
-# ============================================
-.DS_Store
-Thumbs.db
-Desktop.ini
-
-# ============================================
-# IDE & Editor Files
-# ============================================
-# VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-*.code-workspace
-
-# JetBrains IDEs
-.idea/
-*.iml
-*.iws
-*.ipr
-
-# Visual Studio
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -69,33 +22,3 @@ Desktop.ini
 *.njsproj
 *.sln
 *.sw?
-.vs/
-
-# ============================================
-# Testing & Coverage
-# ============================================
-/coverage/
-/.nyc_output/
-*.lcov
-
-# ============================================
-# Temporary Files
-# ============================================
-*.tmp
-*.temp
-*.swp
-*.swo
-*~
-.cache/
-
-# ============================================
-# Miscellaneous
-# ============================================
-/.sass-cache/
-/connect.lock
-/typings/
-/.angular/cache/
-
-# Angular
-.angular
-.env
