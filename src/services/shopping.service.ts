@@ -2,7 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin, of, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
-import { ShoppingListItem, ShoppingCategory, ShoppingList, Product } from '../models/shopping.model';
+import { CartItem, ShoppingCategory, ShoppingList, Product, ShoppingListResponse, ShoppingCategoryResponse, ProductResponse } from '../models/shopping.model';
 import { NotificationService } from './notification.service';
 import { environment } from '../environments/environment';
 
@@ -31,9 +31,9 @@ export class ShoppingService {
 
   loadInitialData(): Observable<any> {
     return forkJoin({
-      lists: this.http.get<{lists: ShoppingList[]}>(`${this.apiUrl}/lists`),
-      categories: this.http.get<{categories: ShoppingCategory[]}>(`${this.apiUrl}/categories`),
-      products: this.http.get<{products: Product[]}>(`${this.apiUrl}/products`),
+      lists: this.http.get<ShoppingListResponse>(`${this.apiUrl}/lists`),
+      categories: this.http.get<ShoppingCategoryResponse>(`${this.apiUrl}/categories`),
+      products: this.http.get<ProductResponse>(`${this.apiUrl}/products`),
     }).pipe(
       tap(data => {
         this.shoppingLists.set(data.lists.lists);
@@ -60,6 +60,11 @@ export class ShoppingService {
     if (!listId) {
       this.activeListId.set(null);
       return;
+    }
+
+    const preloadedList = this.shoppingLists().find(list => list.id === listId);
+    if (preloadedList) {
+      this.activeListId.set(listId);
     }
 
     const draft = localStorage.getItem(`shopping_list_draft_${listId}`);

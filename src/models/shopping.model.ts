@@ -9,21 +9,29 @@ export const productUnits: { value: ProductUnit, label: string }[] = [
   { value: 'cx', label: 'Caixa (cx)' }
 ];
 
+export interface ShoppingCategoryResponse {
+  categories: ShoppingCategory[];
+}
+
 export interface ShoppingCategory {
   id: string;
   name: string;
   userId?: string;
-  createdAt?: string;
+  created_at?: string;
   updatedAt?: string;
+}
+
+export interface ProductResponse {
+  products: Product[];
 }
 
 export interface Product {
   id: string;
   name: string;
-  categoryId?: string;
+  category_id?: string;
   unit: ProductUnit;
   userId?: string;
-  createdAt?: string;
+  created_at?: string;
   updatedAt?: string;
 }
 
@@ -35,19 +43,23 @@ export interface ShoppingListItem {
   quantity: number;
   price: number;
   checked: boolean;
-  categoryId?: string; // Denormalized for easier grouping
+  category_id?: string; // Denormalized for easier grouping
   unit: ProductUnit; // Denormalized for easier display
   userId?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
+export interface ShoppingListResponse {
+  lists: ShoppingList[];
+}
+
 export interface ShoppingList {
   id: string;
   name: string;
-  createdAt: string; // YYYY-MM-DD
-  items: ShoppingListItem[];
-  status: 'pending' | 'completed';
+  created_at: string; // YYYY-MM-DD
+  items: CartItem[];
+  status: 'pending' | 'completed' | 'andamento';
   completedAt?: string; // YYYY-MM-DD
   totalAmount?: number;
   userId?: string;
