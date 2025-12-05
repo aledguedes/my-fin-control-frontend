@@ -20,11 +20,11 @@ export interface ShoppingCategory {
 export interface Product {
   id: string;
   name: string;
-  categoryId?: string;
+  category_id?: string;
   unit: ProductUnit;
-  userId?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ShoppingListItem {

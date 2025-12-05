@@ -51,7 +51,7 @@ export class ShoppingHomeComponent implements OnInit {
       const categories = this.shoppingService.shoppingCategories();
       const grouped = categories.map(cat => ({
           ...cat,
-          products: products.filter(p => p.categoryId === cat.id).sort((a,b) => a.name.localeCompare(b.name))
+          products: products.filter(p => p.category_id === cat.id).sort((a,b) => a.name.localeCompare(b.name))
       }));
       return grouped.filter(g => g.products.length > 0);
   });
@@ -224,7 +224,7 @@ export class ShoppingHomeComponent implements OnInit {
     this.editProductForm.setValue({
       id: product.id,
       name: product.name,
-      categoryId: product.categoryId ?? null,
+      categoryId: product.category_id ?? null,
       unit: product.unit
     });
   }

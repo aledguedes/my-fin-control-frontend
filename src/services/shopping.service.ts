@@ -37,8 +37,8 @@ export class ShoppingService {
     }).pipe(
       tap(data => {
         this.shoppingLists.set(data.lists.lists);
-        this.shoppingCategories.set(data.categories.categories);
         this.products.set(data.products.products);
+        this.shoppingCategories.set(data.categories.categories);
       }),
       catchError(() => {
         this.notificationService.show('Erro ao carregar dados de compras.', 'error');

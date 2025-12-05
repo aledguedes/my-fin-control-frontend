@@ -59,6 +59,7 @@ export class ShoppingCartComponent {
       categoryName: category.name,
       items: items.filter(item => item.categoryId === category.id).sort((a,b) => a.name.localeCompare(b.name)),
     })).filter(g => g.items.length > 0);
+    console.log(grouped);
 
     const uncategorizedItems = items.filter(item => !item.categoryId || !categories.some(c => c.id === item.categoryId));
     if (uncategorizedItems.length > 0) {
@@ -91,7 +92,7 @@ export class ShoppingCartComponent {
       .map(category => ({
         categoryName: category.name,
         products: filteredProducts
-          .filter(p => p.categoryId === category.id)
+          .filter(p => p.category_id === category.id)
           .sort((a, b) => a.name.localeCompare(b.name)),
       }))
       .filter(g => g.products.length > 0);
@@ -128,10 +129,10 @@ export class ShoppingCartComponent {
           quantity: 1,
           price: 0,
           checked: false,
-          categoryId: product.categoryId,
+          categoryId: product.category_id,
           unit: product.unit
         };
-      }).filter((item): item is ShoppingListItem => item !== null);
+      }).filter(item => item !== null);
 
       return {
         ...list,
