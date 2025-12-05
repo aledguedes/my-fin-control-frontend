@@ -42,14 +42,18 @@ export interface ShoppingListItem {
   updatedAt?: string;
 }
 
+export interface ShoppingListResponse {
+  list: ShoppingList;
+}
+
 export interface ShoppingList {
   id: string;
   name: string;
-  createdAt: string; // YYYY-MM-DD
+  created_at: string; // YYYY-MM-DD
   items: ShoppingListItem[];
   status: 'pending' | 'completed';
-  completedAt?: string; // YYYY-MM-DD
-  totalAmount?: number;
-  userId?: string;
-  updatedAt?: string;
+  completed_at?: string; // YYYY-MM-DD
+  total_amount?: number;
+  user_id?: string;
+  updated_at?: string;
 }

@@ -40,8 +40,8 @@ export class ShoppingHomeComponent implements OnInit {
     return this.shoppingService.shoppingLists().slice().sort((a, b) => {
       if (a.status === 'pending' && b.status === 'completed') return -1;
       if (a.status === 'completed' && b.status === 'pending') return 1;
-      const dateA = new Date(a.completedAt || a.createdAt).getTime();
-      const dateB = new Date(b.completedAt || b.createdAt).getTime();
+      const dateA = new Date(a.completed_at || a.created_at).getTime();
+      const dateB = new Date(b.completed_at || b.created_at).getTime();
       return dateB - dateA;
     });
   });

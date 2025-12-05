@@ -2,7 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin, of, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
-import { ShoppingListItem, ShoppingCategory, ShoppingList, Product } from '../models/shopping.model';
+import { ShoppingListItem, ShoppingCategory, ShoppingList, Product, ProductUnit, ShoppingListResponse } from '../models/shopping.model';
 import { NotificationService } from './notification.service';
 import { environment } from '../environments/environment';
 
@@ -62,33 +62,46 @@ export class ShoppingService {
       return;
     }
 
-    const draft = localStorage.getItem(`shopping_list_draft_${listId}`);
-    
-    const syncAndSet = (listToSync: ShoppingList) => {
-        this.syncList(listToSync).subscribe({
-          next: (syncedList) => {
-            this.shoppingLists.update(lists => lists.map(l => l.id === listId ? syncedList : l));
-            this.activeListId.set(listId);
-          },
-          error: () => {
-             this.notificationService.show('Falha ao sincronizar alterações. Carregando última versão salva.', 'error');
-             this.loadAndSetActiveList(listId);
-          }
-        });
-    };
-
-    if (draft) {
-      const listFromDraft: ShoppingList = JSON.parse(draft);
-      syncAndSet(listFromDraft);
-    } else {
-      this.loadAndSetActiveList(listId);
-    }
+    this.loadAndSetActiveList(listId);
   }
 
   private loadAndSetActiveList(listId: string): void {
-      this.http.get<ShoppingList>(`${this.apiUrl}/lists/${listId}`).subscribe(listDetails => {
-          this.shoppingLists.update(lists => lists.map(l => l.id === listId ? listDetails : l));
+      this.http.get<{ list: ShoppingList }>(`${this.apiUrl}/lists/${listId}`).subscribe({
+        next: (response) => {
+          const rawList = response.list;
+          
+          // Map API response (snake_case) to Frontend Model (camelCase)
+          const mappedList: ShoppingList = {
+            id: rawList.id,
+            name: rawList.name,
+            status: rawList.status,
+            created_at: rawList.created_at,
+            completed_at: rawList.completed_at,
+            total_amount: rawList.total_amount,
+            user_id: rawList.user_id,
+            updated_at: rawList.updated_at,
+            items: (rawList.items || []).map((item: any) => ({
+              id: item.id,
+              quantity: item.quantity,
+              price: item.price,
+              checked: Boolean(item.checked), // Ensure boolean
+              productId: item.product_id,
+              shoppingListId: item.shopping_list_id,
+              name: item.product_name, // Denormalized name
+              categoryId: item.category_id, // Note: The API example has 'category_name' but model expects 'categoryId'. Check if 'category_id' comes in response or we need to infer/ignore
+              unit: 'un', // Defaulting as API sample didn't show unit
+              createdAt: item.created_at,
+              updatedAt: item.updated_at
+            }))
+          };
+
+          this.shoppingLists.update(lists => lists.map(l => l.id === listId ? mappedList : l));
           this.activeListId.set(listId);
+        },
+        error: (err) => {
+          console.error('Error loading list details', err);
+          this.notificationService.show('Erro ao carregar detalhes da lista.', 'error');
+        }
       });
   }
 
