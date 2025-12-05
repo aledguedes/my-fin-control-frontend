@@ -55,13 +55,13 @@ export class ShoppingCartComponent {
   groupedItems = computed(() => {
     const items = this.items();
     const categories = this.shoppingService.shoppingCategories();
+    
     const grouped: { categoryName: string; items: ShoppingListItem[] }[] = categories.map(category => ({
       categoryName: category.name,
-      items: items.filter(item => item.categoryId === category.id).sort((a,b) => a.name.localeCompare(b.name)),
+      items: items.filter(item => String(item.categoryId) === String(category.id)).sort((a,b) => a.name.localeCompare(b.name)),
     })).filter(g => g.items.length > 0);
-    console.log(grouped);
 
-    const uncategorizedItems = items.filter(item => !item.categoryId || !categories.some(c => c.id === item.categoryId));
+    const uncategorizedItems = items.filter(item => !item.categoryId || !categories.some(c => String(c.id) === String(item.categoryId)));
     if (uncategorizedItems.length > 0) {
       grouped.push({ categoryName: 'Sem Categoria', items: uncategorizedItems.sort((a,b) => a.name.localeCompare(b.name)) });
     }

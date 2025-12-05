@@ -31,16 +31,50 @@ export class ShoppingService {
 
   loadInitialData(): Observable<any> {
     return forkJoin({
-      lists: this.http.get<{lists: ShoppingList[]}>(`${this.apiUrl}/lists`),
-      categories: this.http.get<{categories: ShoppingCategory[]}>(`${this.apiUrl}/categories`),
-      products: this.http.get<{products: Product[]}>(`${this.apiUrl}/products`),
+      lists: this.http.get<{lists: any[]}>(`${this.apiUrl}/lists`),
+      categories: this.http.get<{categories: any[]}>(`${this.apiUrl}/categories`),
+      products: this.http.get<{products: any[]}>(`${this.apiUrl}/products`),
     }).pipe(
       tap(data => {
-        this.shoppingLists.set(data.lists.lists);
-        this.products.set(data.products.products);
-        this.shoppingCategories.set(data.categories.categories);
+        // Map Lists
+        const mappedLists: ShoppingList[] = (data.lists.lists || []).map(l => ({
+            id: String(l.id),
+            name: l.name,
+            status: l.status,
+            created_at: l.created_at,
+            completed_at: l.completed_at,
+            total_amount: l.total_amount,
+            user_id: l.user_id,
+            updated_at: l.updated_at,
+            items: [] 
+        }));
+        this.shoppingLists.set(mappedLists);
+
+        // Map Products
+        const mappedProducts: Product[] = (data.products.products || []).map(p => ({
+            id: String(p.id),
+            name: p.name,
+            category_id: p.category_id ? String(p.category_id) : undefined,
+            unit: p.unit as ProductUnit,
+            user_id: p.user_id,
+            created_at: p.created_at,
+            updated_at: p.updated_at
+        }));
+        this.products.set(mappedProducts);
+
+        // Map Categories
+        const mappedCategories: ShoppingCategory[] = (data.categories.categories || []).map(c => ({
+            id: String(c.id),
+            name: c.name,
+            userId: c.user_id,
+            createdAt: c.created_at,
+            updatedAt: c.updated_at
+        }));
+        this.shoppingCategories.set(mappedCategories);
+        console.log('Loaded Categories:', mappedCategories);
       }),
-      catchError(() => {
+      catchError((err) => {
+        console.error('Error loading initial data', err);
         this.notificationService.show('Erro ao carregar dados de compras.', 'error');
         return of(null);
       })
@@ -72,7 +106,7 @@ export class ShoppingService {
           
           // Map API response (snake_case) to Frontend Model (camelCase)
           const mappedList: ShoppingList = {
-            id: rawList.id,
+            id: String(rawList.id),
             name: rawList.name,
             status: rawList.status,
             created_at: rawList.created_at,
@@ -80,19 +114,31 @@ export class ShoppingService {
             total_amount: rawList.total_amount,
             user_id: rawList.user_id,
             updated_at: rawList.updated_at,
-            items: (rawList.items || []).map((item: any) => ({
-              id: item.id,
-              quantity: item.quantity,
-              price: item.price,
-              checked: Boolean(item.checked), // Ensure boolean
-              productId: item.product_id,
-              shoppingListId: item.shopping_list_id,
-              name: item.product_name, // Denormalized name
-              categoryId: item.category_id, // Note: The API example has 'category_name' but model expects 'categoryId'. Check if 'category_id' comes in response or we need to infer/ignore
-              unit: 'un', // Defaulting as API sample didn't show unit
-              createdAt: item.created_at,
-              updatedAt: item.updated_at
-            }))
+            items: (rawList.items || []).map((item: any) => {
+              // Try to find categoryId from the item itself, or lookup in loaded products
+              let categoryId = item.category_id ? String(item.category_id) : undefined;
+              
+              if (!categoryId && item.product_id) {
+                  const product = this.products().find(p => String(p.id) === String(item.product_id));
+                  if (product && product.category_id) {
+                      categoryId = String(product.category_id);
+                  }
+              }
+
+              return {
+                id: String(item.id),
+                quantity: item.quantity,
+                price: item.price,
+                checked: Boolean(item.checked), // Ensure boolean
+                productId: String(item.product_id),
+                shoppingListId: String(item.shopping_list_id),
+                name: item.product_name, // Denormalized name
+                categoryId: categoryId,
+                unit: 'un', // Defaulting as API sample didn't show unit
+                createdAt: item.created_at,
+                updatedAt: item.updated_at
+              };
+            })
           };
 
           this.shoppingLists.update(lists => lists.map(l => l.id === listId ? mappedList : l));
