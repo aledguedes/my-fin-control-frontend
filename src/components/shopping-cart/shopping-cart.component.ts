@@ -38,7 +38,17 @@ export class ShoppingCartComponent {
     effect(() => {
       const activeList = this.shoppingService.activeList();
       if (activeList) {
-        this.localList.set(JSON.parse(JSON.stringify(activeList)));
+        const savedDraft = localStorage.getItem(`shopping_list_draft_${activeList.id}`);
+        if (savedDraft) {
+          try {
+            this.localList.set(JSON.parse(savedDraft));
+          } catch (e) {
+            console.error('Failed to parse draft from local storage', e);
+            this.localList.set(JSON.parse(JSON.stringify(activeList)));
+          }
+        } else {
+          this.localList.set(JSON.parse(JSON.stringify(activeList)));
+        }
       } else {
         this.localList.set(null);
       }
