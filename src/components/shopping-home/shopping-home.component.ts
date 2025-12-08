@@ -113,20 +113,18 @@ export class ShoppingHomeComponent implements OnInit {
     });
   }
 
-  handleCompletePurchase(): void {
-    const activeList = this.shoppingService.activeList();
-    if (!activeList) return;
-    
-    localStorage.removeItem(`shopping_list_draft_${activeList.id}`);
-    
+  handleCompletePurchase(list: ShoppingList): void {
     this.loadingAction.set('complete-purchase');
-    this.shoppingService.completeActiveList().pipe(
+    this.shoppingService.completeActiveList(list).pipe(
       finalize(() => this.loadingAction.set(null))
     ).subscribe(() => {
+      // ONLY remove draft if API call succeeds
+      localStorage.removeItem(`shopping_list_draft_${list.id}`);
+
       const purchaseDetails: Partial<Transaction> = {
         type: 'expense',
-        amount: this.shoppingService.total(),
-        description: `Compras: ${activeList.name}`,
+        amount: list.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        description: `Compras: ${list.name}`, 
         // FIX: Renamed 'date' to 'transactionDate' to match the Transaction model.
         transactionDate: new Date().toISOString().split('T')[0],
         paymentMethod: 'Débito',

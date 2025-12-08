@@ -3,7 +3,7 @@
   @if (shoppingService.activeList(); as activeList) {
     <!-- Active Shopping List View -->
     <div>
-      <app-shopping-cart (completePurchase)="handleCompletePurchase()"></app-shopping-cart>
+      <app-shopping-cart (completePurchase)="handleCompletePurchase($event)"></app-shopping-cart>
     </div>
   } @else {
     @switch (view()) {

@@ -151,7 +151,7 @@ export class ShoppingService {
       });
   }
 
-  syncList(list: ShoppingList): Observable<ShoppingList> {
+  syncList(list: ShoppingList, showNotification: boolean = true): Observable<ShoppingList> {
     const payload = {
         name: list.name,
         status: list.status,
@@ -167,10 +167,14 @@ export class ShoppingService {
     return this.http.put<ShoppingList>(`${this.apiUrl}/lists/${list.id}`, payload).pipe(
       tap(() => {
         localStorage.removeItem(`shopping_list_draft_${list.id}`);
-        this.notificationService.show('Alterações salvas com sucesso!', 'success');
+        if (showNotification) {
+          this.notificationService.show('Alterações salvas com sucesso!', 'success');
+        }
       }),
       catchError(err => {
-        this.notificationService.show('Falha ao sincronizar com o servidor. Suas alterações continuam salvas localmente.', 'error');
+        if (showNotification) {
+          this.notificationService.show('Falha ao sincronizar com o servidor. Suas alterações continuam salvas localmente.', 'error');
+        }
         return throwError(() => err);
       })
     );
@@ -187,10 +191,8 @@ export class ShoppingService {
     );
   }
   
-  completeActiveList(): Observable<any> {
-    const list = this.activeList();
-    if (!list) return of(null);
-    return this.http.post<object>(`${this.apiUrl}/lists/${list.id}/complete`, {}).pipe(
+  completeActiveList(list: ShoppingList): Observable<any> {
+    return this.http.put<object>(`${this.apiUrl}/lists/${list.id}/complete`, list).pipe(
       tap(() => {
         this.shoppingLists.update(lists =>
           lists.map(l => l.id === list.id ? { ...l, status: 'completed' } : l)

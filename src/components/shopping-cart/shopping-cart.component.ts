@@ -1,4 +1,6 @@
-import { Component, ChangeDetectionStrategy, output, signal, computed, inject, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, output, signal, computed, inject, effect, DestroyRef } from '@angular/core';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShoppingService } from '../../services/shopping.service';
@@ -14,10 +16,11 @@ import { v4 as uuidv4 } from 'uuid';
   imports: [CommonModule, FormsModule, CurrencyMaskDirective],
 })
 export class ShoppingCartComponent {
-  completePurchase = output<void>();
+  completePurchase = output<ShoppingList>();
 
   shoppingService = inject(ShoppingService);
   notificationService = inject(NotificationService);
+  destroyRef = inject(DestroyRef);
 
   localList = signal<ShoppingList | null>(null);
 
@@ -41,7 +44,10 @@ export class ShoppingCartComponent {
         const savedDraft = localStorage.getItem(`shopping_list_draft_${activeList.id}`);
         if (savedDraft) {
           try {
-            this.localList.set(JSON.parse(savedDraft));
+            const parsedDraft = JSON.parse(savedDraft);
+            this.localList.set(parsedDraft);
+            // Sync draft to API immediately on entry as requested
+            this.shoppingService.syncList(parsedDraft, false).subscribe();
           } catch (e) {
             console.error('Failed to parse draft from local storage', e);
             this.localList.set(JSON.parse(JSON.stringify(activeList)));
@@ -54,12 +60,16 @@ export class ShoppingCartComponent {
       }
     }, { allowSignalWrites: true });
 
-    effect(() => {
-      const currentList = this.localList();
-      if (currentList && currentList.status === 'pending') {
-        localStorage.setItem(`shopping_list_draft_${currentList.id}`, JSON.stringify(currentList));
-      }
-    });
+    toObservable(this.localList)
+      .pipe(
+        debounceTime(1000),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(currentList => {
+        if (currentList && currentList.status === 'pending') {
+          localStorage.setItem(`shopping_list_draft_${currentList.id}`, JSON.stringify(currentList));
+        }
+      });
   }
   
   groupedItems = computed(() => {
@@ -144,9 +154,11 @@ export class ShoppingCartComponent {
         };
       }).filter(item => item !== null);
 
+      const updatedItems = [...list.items, ...newItems];
       return {
         ...list,
-        items: [...list.items, ...newItems]
+        items: updatedItems,
+        total_amount: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
       };
     });
 
@@ -159,14 +171,17 @@ export class ShoppingCartComponent {
   updateItem(itemId: string, field: 'quantity' | 'price' | 'checked', value: number | boolean): void {
     this.localList.update(list => {
       if (!list) return null;
-      return {
-        ...list,
-        items: list.items.map(item => {
+      const updatedItems = list.items.map(item => {
           if (item.id === itemId) {
             return { ...item, [field]: value };
           }
           return item;
-        })
+        });
+      
+      return {
+        ...list,
+        items: updatedItems,
+        total_amount: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
       };
     });
   }
@@ -174,9 +189,11 @@ export class ShoppingCartComponent {
   removeItem(itemId: string): void { 
     this.localList.update(list => {
       if (!list) return null;
+      const updatedItems = list.items.filter(item => item.id !== itemId);
       return {
         ...list,
-        items: list.items.filter(item => item.id !== itemId)
+        items: updatedItems,
+        total_amount: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
       };
     });
   }
@@ -185,13 +202,24 @@ export class ShoppingCartComponent {
     this.updateItem(item.id, 'checked', !item.checked);
   }
   
+  isCompletionModalOpen = signal(false);
+
   onCompletePurchase(): void {
     if (this.total() > 0) {
-        if(confirm('Concluir a compra irá arquivar a lista atual. Deseja continuar?')) {
-            this.shoppingService.activeListId.set(this.localList()?.id ?? null);
-            this.completePurchase.emit();
-        }
+      this.isCompletionModalOpen.set(true);
     }
+  }
+
+  confirmCompletion(): void {
+    const list = this.localList();
+    if (list) {
+        this.completePurchase.emit(list);
+    }
+    this.isCompletionModalOpen.set(false);
+  }
+
+  closeCompletionModal(): void {
+    this.isCompletionModalOpen.set(false);
   }
   
   trackById(index: number, item: ShoppingListItem | Product): string { return item.id; }
