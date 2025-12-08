@@ -10,9 +10,9 @@ export interface FinancialCategory {
 export type payment_method = 'Dinheiro' | 'Débito' | 'Crédito' | 'Carnê' | 'Boleto' | 'Transferência' | 'Financiamento' | 'Empréstimo';
 
 export interface InstallmentDetails {
-  totalInstallments: number;
-  paidInstallments: number;
-  startDate: string; // YYYY-MM-DD
+  total_installments: number;
+  paid_installments: number;
+  start_date: string; // YYYY-MM-DD
 }
 
 export interface Transaction {
@@ -29,17 +29,17 @@ export interface Transaction {
   userId?: string;
   createdAt?: string;
   updatedAt?: string;
-  recurrenceStartDate?: string;
-  totalInstallments?: number;
-  startDate?: string;
-  paidInstallments?: number;
+  recurrence_start_date?: string;
+  total_installments?: number;
+  start_date?: string;
+  paid_installments?: number;
 }
 
 // This is a derived model, not stored directly. Represents one installment payment.
 export interface InstallmentEntry {
   parentTransactionId: string;
   installmentNumber: number;
-  totalInstallments: number;
+  total_installments: number;
   dueDate: Date;
   amount: number;
   status: 'paid' | 'pending';
@@ -54,10 +54,10 @@ export interface InstallmentPlan {
     description: string;
     totalAmount: number;
     installmentAmount: number;
-    totalInstallments: number;
-    paidInstallments: number;
+    total_installments: number;
+    paid_installments: number;
     remainingInstallments: number;
-    startDate: string; // YYYY-MM-DD
+    start_date: string; // YYYY-MM-DD
     status: 'ativo' | 'atrasado' | 'concluído';
     type: 'revenue' | 'expense';
     category_id: string;
@@ -74,7 +74,7 @@ export interface MonthlyTransaction {
   is_installment?: boolean;
   is_recurrent?: boolean;
   installmentNumber?: number;
-  totalInstallments?: number;
+  total_installments?: number;
   payment_method?: payment_method;
 }
 

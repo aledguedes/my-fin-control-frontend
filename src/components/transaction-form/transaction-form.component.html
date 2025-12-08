@@ -77,6 +77,15 @@
                 </div>
             </div>
           }
+          
+          <!-- Recurrence Details -->
+          @if (transactionForm.value.is_recurrent) {
+             <div class="border-t pt-4 animate-fade-in-down">
+                <label for="recurrence_start_date" class="block text-sm font-medium text-neutral-700">Início da Recorrência</label>
+                <input type="date" id="recurrence_start_date" formControlName="recurrence_start_date" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base">
+                 <p class="mt-1 text-xs text-neutral-500">A partir desta data, esta despesa se repetirá mensalmente.</p>
+             </div>
+          }
 
           <!-- Installments Details -->
           @if (transactionForm.value.is_installment) {
@@ -90,8 +99,8 @@
                     </div>
                   </div>
                   <div>
-                    <label for="totalInstallments" class="block text-sm font-medium text-neutral-700">Nº de Parcelas</label>
-                    <input type="number" id="totalInstallments" formControlName="totalInstallments" min="2" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm py-2 px-3">
+                    <label for="total_installments" class="block text-sm font-medium text-neutral-700">Nº de Parcelas</label>
+                    <input type="number" id="total_installments" formControlName="total_installments" min="2" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm py-2 px-3">
                   </div>
                </div>
                 <div>
@@ -102,8 +111,8 @@
                     </div>
                 </div>
                 <div>
-                    <label for="startDate" class="block text-sm font-medium text-neutral-700">Início do Pagamento</label>
-                    <input type="date" id="startDate" formControlName="startDate" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm py-2 px-3">
+                    <label for="start_date" class="block text-sm font-medium text-neutral-700">Início do Pagamento</label>
+                    <input type="date" id="start_date" formControlName="start_date" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm py-2 px-3">
                 </div>
             </div>
           }

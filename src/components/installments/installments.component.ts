@@ -31,7 +31,7 @@ export class InstallmentsComponent {
   }
 
   getPaidAmount(plan: InstallmentPlan): number {
-    return plan.paidInstallments * plan.installmentAmount;
+    return plan.paid_installments * plan.installmentAmount;
   }
 
   getPendingAmount(plan: InstallmentPlan): number {
@@ -39,9 +39,9 @@ export class InstallmentsComponent {
   }
   
   getEndDate(plan: InstallmentPlan): Date {
-    const startDate = new Date(plan.startDate);
-    const date = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
-    date.setMonth(date.getMonth() + plan.totalInstallments -1);
+    const start_date = new Date(plan.start_date);
+    const date = new Date(start_date.getFullYear(), start_date.getMonth(), start_date.getDate());
+    date.setMonth(date.getMonth() + plan.total_installments -1);
     return date;
   }
 
@@ -50,8 +50,8 @@ export class InstallmentsComponent {
   }
 
   getProgressBarWidth(plan: InstallmentPlan): string {
-    if (plan.totalInstallments === 0) return '0%';
-    const percentage = (plan.paidInstallments / plan.totalInstallments) * 100;
+    if (plan.total_installments === 0) return '0%';
+    const percentage = (plan.paid_installments / plan.total_installments) * 100;
     return `${percentage}%`;
   }
 }

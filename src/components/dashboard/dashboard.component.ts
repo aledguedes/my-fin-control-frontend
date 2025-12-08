@@ -67,7 +67,7 @@ export class DashboardComponent {
       is_installment: monthlyTx.is_installment ?? false,
       is_recurrent: monthlyTx.is_recurrent ?? false,
       payment_method: monthlyTx.payment_method,
-      totalInstallments: monthlyTx.totalInstallments,
+      total_installments: monthlyTx.total_installments,
     };
     this.uiService.openTransactionModal(transaction);
   }

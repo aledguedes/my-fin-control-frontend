@@ -36,7 +36,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
   {
     id: 't4', type: 'expense', amount: 2400, transaction_date: '2024-05-20',
     description: 'Curso de Inglês', category_id: 'c7', payment_method: 'Carnê', is_installment: true,
-    installments: { totalInstallments: 12, paidInstallments: 0, startDate: '2024-06-10' },
+    installments: { total_installments: 12, paid_installments: 0, start_date: '2024-06-10' },
   },
    // Despesa Recorrente
   {
