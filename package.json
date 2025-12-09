@@ -6,24 +6,38 @@
   "scripts": {
     "dev": "ng serve",
     "build": "ng build",
-    "preview": "ng serve --configuration=production"
+    "preview": "ng serve --configuration=production",
+    "lint": "eslint \"src/**/*.{ts,html}\"",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier --write \"src/**/*.{ts,html,scss}\""
   },
   "dependencies": {
-    "uuid": "^9.0.1",
-    "rxjs": "^7.8.2",
-    "@angular/core": "^20.3.0",
-    "@angular/platform-browser": "^20.3.0",
-    "@angular/forms": "^20.3.12",
-    "@angular/compiler": "^20.3.0",
-    "@angular/common": "^20.3.0",
-    "@angular/router": "^20.3.12",
     "@angular/build": "^20.3.0",
     "@angular/cli": "^20.3.0",
+    "@angular/common": "^20.3.0",
+    "@angular/compiler": "^20.3.0",
     "@angular/compiler-cli": "^20.3.0",
-    "tailwindcss": "latest"
+    "@angular/core": "^20.3.0",
+    "@angular/forms": "^20.3.12",
+    "@angular/platform-browser": "^20.3.0",
+    "@angular/router": "^20.3.12",
+    "rxjs": "^7.8.2",
+    "tailwindcss": "latest",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@angular-eslint/eslint-plugin": "^21.1.0",
+    "@angular-eslint/eslint-plugin-template": "^21.1.0",
+    "@angular-eslint/template-parser": "^21.1.0",
     "@types/node": "^22.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/parser": "^8.49.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsdoc": "^61.5.0",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "prettier": "^3.7.4",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }
