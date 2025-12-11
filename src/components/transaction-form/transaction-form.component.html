@@ -1,142 +1,340 @@
-<div class="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-center p-4" (click)="closeModal.emit()">
-  <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg relative animate-fade-in-up" (click)="$event.stopPropagation()">
-    <button (click)="closeModal.emit()" class="absolute top-3 right-3 text-neutral-400 hover:text-neutral-600 transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-    </button>
-    <div class="p-6">
-      <h2 class="text-2xl font-bold text-neutral-800 mb-6">{{ transactionToEdit() ? 'Editar' : 'Novo' }} Lançamento</h2>
+<div
+  class="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-center p-4"
+  (click)="closeModal.emit()"
+>
+  <div
+    class="bg-white rounded-lg shadow-2xl w-full max-w-lg relative animate-fade-in-up flex flex-col max-h-[90vh]"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header - Fixed -->
+    <div
+      class="flex-shrink-0 px-6 py-4 border-b border-neutral-200 flex items-center justify-between"
+    >
+      <h2 class="text-2xl font-bold text-neutral-800">
+        {{ transactionToEdit() ? 'Editar' : 'Novo' }} Lançamento
+      </h2>
+      <button
+        (click)="closeModal.emit()"
+        class="text-neutral-400 hover:text-neutral-600 transition-colors"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body - Scrollable -->
+    <div class="flex-1 overflow-y-auto px-6 py-4">
       @if (transactionForm) {
-      <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
-        <div class="space-y-4">
-          <!-- Type -->
-          <div class="flex rounded-md shadow-sm">
-            <button type="button" (click)="transactionForm.get('type')?.setValue('expense')" [class.bg-indigo-600]="transactionForm.value.type === 'expense'" [class.text-white]="transactionForm.value.type === 'expense'" class="flex-1 px-4 py-3 text-base rounded-l-md border border-neutral-300 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 transition-colors">Despesa</button>
-            <button type="button" (click)="transactionForm.get('type')?.setValue('revenue')" [class.bg-indigo-600]="transactionForm.value.type === 'revenue'" [class.text-white]="transactionForm.value.type === 'revenue'" class="flex-1 px-4 py-3 text-base -ml-px rounded-r-md border border-neutral-300 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 transition-colors">Receita</button>
-          </div>
+        <form
+          [formGroup]="transactionForm"
+          id="transactionForm"
+          (ngSubmit)="onSubmit()"
+          class="flex flex-col"
+        >
+          <div class="space-y-4">
+            <!-- Type -->
+            <div class="flex rounded-md shadow-sm">
+              <button
+                type="button"
+                (click)="transactionForm.get('type')?.setValue('expense')"
+                [class.bg-indigo-600]="transactionForm.value.type === 'expense'"
+                [class.text-white]="transactionForm.value.type === 'expense'"
+                class="flex-1 px-4 py-3 text-base rounded-l-md border border-neutral-300 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 transition-colors"
+              >
+                Despesa
+              </button>
+              <button
+                type="button"
+                (click)="transactionForm.get('type')?.setValue('revenue')"
+                [class.bg-indigo-600]="transactionForm.value.type === 'revenue'"
+                [class.text-white]="transactionForm.value.type === 'revenue'"
+                class="flex-1 px-4 py-3 text-base -ml-px rounded-r-md border border-neutral-300 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 transition-colors"
+              >
+                Receita
+              </button>
+            </div>
 
-          <!-- Description -->
-          <div>
-            <label for="description" class="block text-sm font-medium text-neutral-700">Descrição</label>
-            <input type="text" id="description" formControlName="description" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base" placeholder="Ex: Aluguel, Salário">
-          </div>
-          
-          <!-- Amount -->
-          @if (!transactionForm.value.is_installment) {
+            <!-- Description -->
             <div>
-              <label for="amount" class="block text-sm font-medium text-neutral-700">Valor Total</label>
-              <div class="relative mt-1 rounded-md shadow-sm">
-                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <span class="text-neutral-500 sm:text-sm">R$</span>
-                </div>
-                <input type="text" inputmode="decimal" id="amount" formControlName="amount" appCurrencyMask class="block w-full rounded-md border-2 border-neutral-300 pl-10 pr-4 py-2 focus:border-indigo-500 focus:ring-indigo-500 text-base" placeholder="0,00">
-              </div>
+              <label for="description" class="block text-sm font-medium text-neutral-700"
+                >Descrição</label
+              >
+              <input
+                type="text"
+                id="description"
+                formControlName="description"
+                class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base"
+                placeholder="Ex: Aluguel, Salário"
+              />
             </div>
-          }
 
-          <!-- Category & Payment Method -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div [class.sm:col-span-2]="transactionForm.value.type === 'revenue'">
-              <label for="category" class="block text-sm font-medium text-neutral-700">Categoria</label>
-              <select id="category" formControlName="category_id" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base">
-                <option [ngValue]="null" disabled>Selecione...</option>
-                @for(category of dataService.allCategories(); track category.id) {
-                  @if(category.type === transactionForm.value.type) {
-                    <option [value]="category.id">{{ category.name }}</option>
-                  }
-                }
-              </select>
-            </div>
-            @if (transactionForm.value.type === 'expense') {
+            <!-- Amount -->
+            @if (!transactionForm.value.is_installment) {
               <div>
-                <label for="payment_method" class="block text-sm font-medium text-neutral-700">Forma de Pagamento</label>
-                <select id="payment_method" formControlName="payment_method" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base">
-                  @for(method of payment_methods; track method) {
-                    <option [value]="method">{{ method }}</option>
+                <label for="amount" class="block text-sm font-medium text-neutral-700"
+                  >Valor Total</label
+                >
+                <div class="relative mt-1 rounded-md shadow-sm">
+                  <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <span class="text-neutral-500 sm:text-sm">R$</span>
+                  </div>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    id="amount"
+                    formControlName="amount"
+                    appCurrencyMask
+                    class="block w-full rounded-md border-2 border-neutral-300 pl-10 pr-4 py-2 focus:border-indigo-500 focus:ring-indigo-500 text-base"
+                    placeholder="0,00"
+                  />
+                </div>
+              </div>
+            }
+
+            <!-- Category & Payment Method -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div [class.sm:col-span-2]="transactionForm.value.type === 'revenue'">
+                <label for="category" class="block text-sm font-medium text-neutral-700"
+                  >Categoria</label
+                >
+                <select
+                  id="category"
+                  formControlName="category_id"
+                  class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base"
+                >
+                  <option [ngValue]="null" disabled>Selecione...</option>
+                  @for (category of dataService.allCategories(); track category.id) {
+                    @if (category.type === transactionForm.value.type) {
+                      <option [value]="category.id">{{ category.name }}</option>
+                    }
                   }
                 </select>
               </div>
-            }
-          </div>
-          
-          <!-- Date -->
-          <div>
-            <label for="date" class="block text-sm font-medium text-neutral-700">{{ transactionForm.value.type === 'revenue' ? 'Data do Recebimento' : 'Data da Compra' }}</label>
-            <input type="date" id="date" formControlName="transaction_date" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base">
-          </div>
-
-          <!-- Expense Options Toggles -->
-          @if (transactionForm.value.type === 'expense') {
-            <div class="space-y-3">
-                <div class="flex items-center">
-                    <input id="is_installment" formControlName="is_installment" type="checkbox" [disabled]="transactionForm.value.is_recurrent" class="h-5 w-5 rounded border-2 border-neutral-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed">
-                    <label for="is_installment" class="ml-3 block text-base" [class.text-neutral-500]="transactionForm.value.is_recurrent">Esta despesa é parcelada?</label>
+              @if (transactionForm.value.type === 'expense') {
+                <div>
+                  <label for="payment_method" class="block text-sm font-medium text-neutral-700"
+                    >Forma de Pagamento</label
+                  >
+                  <select
+                    id="payment_method"
+                    formControlName="payment_method"
+                    class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base"
+                  >
+                    @for (method of payment_methods; track method) {
+                      <option [value]="method">{{ method }}</option>
+                    }
+                  </select>
                 </div>
-                <div class="flex items-center">
-                    <input id="is_recurrent" formControlName="is_recurrent" type="checkbox" [disabled]="transactionForm.value.is_installment" class="h-5 w-5 rounded border-2 border-neutral-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed">
-                    <label for="is_recurrent" class="ml-3 block text-base" [class.text-neutral-500]="transactionForm.value.is_installment">Esta despesa é recorrente?</label>
-                </div>
+              }
             </div>
-          }
-          
-          <!-- Recurrence Details -->
-          @if (transactionForm.value.is_recurrent) {
-             <div class="border-t pt-4 animate-fade-in-down">
-                <label for="recurrence_start_date" class="block text-sm font-medium text-neutral-700">Início da Recorrência</label>
-                <input type="date" id="recurrence_start_date" formControlName="recurrence_start_date" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base">
-                 <p class="mt-1 text-xs text-neutral-500">A partir desta data, esta despesa se repetirá mensalmente.</p>
-             </div>
-          }
 
-          <!-- Installments Details -->
-          @if (transactionForm.value.is_installment) {
-            <div class="space-y-4 border-t pt-4" formGroupName="installments">
-               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Date -->
+            <div>
+              <label for="date" class="block text-sm font-medium text-neutral-700">{{
+                transactionForm.value.type === 'revenue' ? 'Data do Recebimento' : 'Data da Compra'
+              }}</label>
+              <input
+                type="date"
+                id="date"
+                formControlName="transaction_date"
+                class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base"
+              />
+            </div>
+
+            <!-- Expense Options Toggles -->
+            @if (transactionForm.value.type === 'expense') {
+              <div class="space-y-3">
+                <div class="flex items-center">
+                  <input
+                    id="is_installment"
+                    formControlName="is_installment"
+                    type="checkbox"
+                    [disabled]="transactionForm.value.is_recurrent"
+                    class="h-5 w-5 rounded border-2 border-neutral-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  />
+                  <label
+                    for="is_installment"
+                    class="ml-3 block text-base"
+                    [class.text-neutral-500]="transactionForm.value.is_recurrent"
+                    >Esta despesa é parcelada?</label
+                  >
+                </div>
+                <div class="flex items-center">
+                  <input
+                    id="is_recurrent"
+                    formControlName="is_recurrent"
+                    type="checkbox"
+                    [disabled]="transactionForm.value.is_installment"
+                    class="h-5 w-5 rounded border-2 border-neutral-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  />
+                  <label
+                    for="is_recurrent"
+                    class="ml-3 block text-base"
+                    [class.text-neutral-500]="transactionForm.value.is_installment"
+                    >Esta despesa é recorrente?</label
+                  >
+                </div>
+              </div>
+            }
+
+            <!-- Recurrence Details -->
+            @if (transactionForm.value.is_recurrent) {
+              <div class="border-t pt-4 animate-fade-in-down">
+                <label
+                  for="recurrence_start_date"
+                  class="block text-sm font-medium text-neutral-700"
+                  >Início da Recorrência</label
+                >
+                <input
+                  type="date"
+                  id="recurrence_start_date"
+                  formControlName="recurrence_start_date"
+                  class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base"
+                />
+                <p class="mt-1 text-xs text-neutral-500">
+                  A partir desta data, esta despesa se repetirá mensalmente.
+                </p>
+              </div>
+            }
+
+            <!-- Installments Details -->
+            @if (transactionForm.value.is_installment) {
+              <div class="space-y-4 border-t pt-4" formGroupName="installments">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label for="installmentAmount" class="block text-sm font-medium text-neutral-700">Valor da Parcela</label>
+                    <label
+                      for="installmentAmount"
+                      class="block text-sm font-medium text-neutral-700"
+                      >Valor da Parcela</label
+                    >
                     <div class="relative mt-1 rounded-md shadow-sm">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><span class="text-neutral-500 sm:text-sm">R$</span></div>
-                        <input type="text" inputmode="decimal" id="installmentAmount" formControlName="installmentAmount" appCurrencyMask class="block w-full rounded-md border-2 border-neutral-300 pl-10 pr-4 py-2" placeholder="0,00">
+                      <div
+                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+                      >
+                        <span class="text-neutral-500 sm:text-sm">R$</span>
+                      </div>
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        id="installmentAmount"
+                        formControlName="installmentAmount"
+                        appCurrencyMask
+                        class="block w-full rounded-md border-2 border-neutral-300 pl-10 pr-4 py-2"
+                        placeholder="0,00"
+                      />
                     </div>
                   </div>
                   <div>
-                    <label for="total_installments" class="block text-sm font-medium text-neutral-700">Nº de Parcelas</label>
-                    <input type="number" id="total_installments" formControlName="total_installments" min="2" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm py-2 px-3">
+                    <label
+                      for="total_installments"
+                      class="block text-sm font-medium text-neutral-700"
+                      >Nº de Parcelas</label
+                    >
+                    <input
+                      type="number"
+                      id="total_installments"
+                      formControlName="total_installments"
+                      min="2"
+                      class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm py-2 px-3"
+                    />
                   </div>
-               </div>
+                </div>
                 <div>
-                    <label for="amountCalculated" class="block text-sm font-medium text-neutral-700">Valor Total (Calculado)</label>
-                    <div class="relative mt-1 rounded-md shadow-sm">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><span class="text-neutral-500 sm:text-sm">R$</span></div>
-                        <input type="text" inputmode="decimal" id="amountCalculated" [value]="transactionForm.value.amount" readonly appCurrencyMask class="block w-full rounded-md border-2 border-neutral-300 bg-neutral-100 pl-10 pr-4 py-2">
+                  <label for="amountCalculated" class="block text-sm font-medium text-neutral-700"
+                    >Valor Total (Calculado)</label
+                  >
+                  <div class="relative mt-1 rounded-md shadow-sm">
+                    <div
+                      class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+                    >
+                      <span class="text-neutral-500 sm:text-sm">R$</span>
                     </div>
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      id="amountCalculated"
+                      [value]="transactionForm.value.amount"
+                      readonly
+                      appCurrencyMask
+                      class="block w-full rounded-md border-2 border-neutral-300 bg-neutral-100 pl-10 pr-4 py-2"
+                    />
+                  </div>
                 </div>
                 <div>
-                    <label for="start_date" class="block text-sm font-medium text-neutral-700">Início do Pagamento</label>
-                    <input type="date" id="start_date" formControlName="start_date" class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm py-2 px-3">
+                  <label for="start_date" class="block text-sm font-medium text-neutral-700"
+                    >Início do Pagamento</label
+                  >
+                  <input
+                    type="date"
+                    id="start_date"
+                    formControlName="start_date"
+                    class="mt-1 block w-full rounded-md border-2 border-neutral-300 shadow-sm py-2 px-3"
+                  />
                 </div>
-            </div>
-          }
-        </div>
-
-        <!-- Actions -->
-        <div class="mt-8 flex justify-end gap-3">
-          <button type="button" (click)="closeModal.emit()" class="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Cancelar
-          </button>
-          <button type="submit" [disabled]="transactionForm.invalid || isSaving()" class="px-6 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]">
-            @if (isSaving()) {
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>Salvando...</span>
-            } @else {
-              <span>Salvar</span>
+              </div>
             }
-          </button>
-        </div>
-      </form>
+          </div>
+        </form>
       }
     </div>
+
+    <!-- Footer - Fixed -->
+    @if (transactionForm) {
+      <div
+        class="flex-shrink-0 px-6 py-4 border-t border-neutral-200 bg-neutral-50 rounded-b-lg flex justify-end gap-3"
+      >
+        <button
+          type="button"
+          (click)="closeModal.emit()"
+          class="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="transactionForm.invalid || isSaving()"
+          form="transactionForm"
+          class="px-6 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]"
+        >
+          @if (isSaving()) {
+            <svg
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span>Salvando...</span>
+          } @else {
+            <span>Salvar</span>
+          }
+        </button>
+      </div>
+    }
   </div>
 </div>

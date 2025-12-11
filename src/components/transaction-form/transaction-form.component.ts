@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, effect, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, effect, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DataService } from '../../services/data.service';
@@ -11,7 +11,7 @@ import { CurrencyMaskDirective } from '../../directives/currency-mask.directive'
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, ReactiveFormsModule, CurrencyMaskDirective],
 })
-export class TransactionFormComponent implements OnInit {
+export class TransactionFormComponent implements OnInit, OnDestroy {
   transactionToEdit = input<Partial<Transaction> | null>(null);
   isSaving = input<boolean>(false);
   closeModal = output<void>();
@@ -35,6 +35,18 @@ export class TransactionFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.buildForm(this.transactionToEdit());
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+  }
+
+  ngOnDestroy(): void {
+    // Restore body scroll when modal is closed
+    document.body.style.overflow = '';
+  }
+
+  @HostListener('window:keydown.escape', ['$event'])
+  handleEscapeKey(event: KeyboardEvent): void {
+    this.closeModal.emit();
   }
 
   private buildForm(data: Partial<Transaction> | null = null): void {

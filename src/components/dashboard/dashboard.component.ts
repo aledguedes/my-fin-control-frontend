@@ -8,6 +8,7 @@ import {
   viewChild,
   ElementRef,
   ChangeDetectorRef,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
@@ -30,6 +31,25 @@ export class DashboardComponent {
   isLoading = signal(true);
   deletingId = signal<string | null>(null);
   monthInput = viewChild<ElementRef<HTMLInputElement>>('monthInput');
+  showMonthPicker = signal(false);
+
+  // Month names in Portuguese (3 letters)
+  monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+  // Get available years (starting from 2025, up to 10 years ahead)
+  availableYears = computed(() => {
+    const years: number[] = [];
+    const startYear = 2025;
+    const endYear = startYear + 10; // 2025 to 2035
+    for (let i = startYear; i <= endYear; i++) {
+      years.push(i);
+    }
+    return years;
+  });
+
+  // Get current month and year
+  currentMonth = computed(() => this.currentDate().getMonth());
+  currentYear = computed(() => this.currentDate().getFullYear());
 
   // Computed signal to format the date for the <input type="month">
   monthYearValue = computed(() => {
@@ -72,54 +92,39 @@ export class DashboardComponent {
     this.cdr.markForCheck();
   }
 
-  // Trigger the month picker input
-  triggerMonthPicker(): void {
+  // Toggle custom month picker dropdown
+  toggleMonthPicker(): void {
     if (this.isLoading()) return;
-
-    // Use setTimeout to ensure DOM is ready
-    setTimeout(() => {
-      const input = this.monthInput()?.nativeElement;
-      if (!input) {
-        console.warn('Month input element not found');
-        return;
-      }
-
-      // Try modern showPicker API first (Chrome 99+)
-      try {
-        if (typeof input.showPicker === 'function') {
-          // Type assertion needed because TypeScript doesn't recognize showPicker return type
-          const pickerPromise = input.showPicker() as unknown as Promise<void> | undefined;
-          if (pickerPromise && typeof pickerPromise.then === 'function') {
-            pickerPromise.catch(() => {
-              // If showPicker fails, use fallback
-              this.fallbackMonthPicker(input);
-            });
-            return;
-          }
-        }
-      } catch (error) {
-        console.warn('showPicker error, using fallback:', error);
-      }
-
-      // Fallback for browsers without showPicker or if it fails
-      this.fallbackMonthPicker(input);
-    }, 0);
+    this.showMonthPicker.update((value) => !value);
   }
 
-  // Fallback method to open month picker
-  private fallbackMonthPicker(input: HTMLInputElement): void {
-    // Temporarily make input visible and clickable
-    const originalStyle = input.style.cssText;
-    input.style.cssText =
-      'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 40px; opacity: 0.01; z-index: 9999;';
+  // Select month from custom picker
+  selectMonth(monthIndex: number): void {
+    const newDate = new Date(this.currentYear(), monthIndex, 2);
+    this.currentDate.set(newDate);
+    this.showMonthPicker.set(false);
+    this.cdr.markForCheck();
+  }
 
-    input.focus();
-    input.click();
+  // Select year from custom picker
+  selectYear(year: number): void {
+    const newDate = new Date(year, this.currentMonth(), 2);
+    this.currentDate.set(newDate);
+    this.showMonthPicker.set(false);
+    this.cdr.markForCheck();
+  }
 
-    // Restore original style after a short delay
-    setTimeout(() => {
-      input.style.cssText = originalStyle;
-    }, 100);
+  // Close picker when clicking outside (handled in template)
+  closeMonthPicker(): void {
+    this.showMonthPicker.set(false);
+  }
+
+  // Close picker on Escape key
+  @HostListener('document:keydown.escape', ['$event'])
+  handleEscapeKey(event: KeyboardEvent): void {
+    if (this.showMonthPicker()) {
+      this.closeMonthPicker();
+    }
   }
 
   getCategoryName(category_id: string): string {
