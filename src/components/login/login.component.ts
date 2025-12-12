@@ -1,4 +1,12 @@
-import { Component, ChangeDetectionStrategy, signal, inject, NgZone, AfterViewInit, ElementRef } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  signal,
+  inject,
+  NgZone,
+  AfterViewInit,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -27,8 +35,8 @@ export class LoginComponent implements AfterViewInit {
   private elementRef = inject(ElementRef);
 
   loginForm = new FormGroup({
-    username: new FormControl('admin', [Validators.required]),
-    password: new FormControl('admin', [Validators.required]),
+    username: new FormControl('admin@fin-control.com', [Validators.required]),
+    password: new FormControl('Thaeme1507#', [Validators.required]),
   });
 
   ngAfterViewInit(): void {
@@ -44,13 +52,18 @@ export class LoginComponent implements AfterViewInit {
       client_id: environment.googleClientId,
       callback: this.handleGoogleSignIn.bind(this),
     });
-    
-    const googleButtonContainer = this.elementRef.nativeElement.querySelector('#google-signin-button');
+
+    const googleButtonContainer =
+      this.elementRef.nativeElement.querySelector('#google-signin-button');
     if (googleButtonContainer) {
-      google.accounts.id.renderButton(
-        googleButtonContainer,
-        { theme: 'outline', size: 'large', type: 'standard', text: 'signin_with', shape: 'rectangular', width: '300' }
-      );
+      google.accounts.id.renderButton(googleButtonContainer, {
+        theme: 'outline',
+        size: 'large',
+        type: 'standard',
+        text: 'signin_with',
+        shape: 'rectangular',
+        width: '300',
+      });
     }
   }
 
@@ -64,7 +77,10 @@ export class LoginComponent implements AfterViewInit {
             this.notificationService.show('Login com Google realizado com sucesso!', 'success');
             this.router.navigate(['/dashboard']);
           } else {
-            this.notificationService.show('Login com Google falhou. Verifique se seu e-mail está autorizado.', 'error');
+            this.notificationService.show(
+              'Login com Google falhou. Verifique se seu e-mail está autorizado.',
+              'error',
+            );
           }
         },
         error: () => {
@@ -84,7 +100,7 @@ export class LoginComponent implements AfterViewInit {
 
     const { username, password } = this.loginForm.getRawValue();
 
-    this.authService.login(username!, password!).subscribe(response => {
+    this.authService.login(username!, password!).subscribe((response) => {
       this.isSubmitting.set(false);
       if (response) {
         this.notificationService.show('Login realizado com sucesso!', 'success');
@@ -96,6 +112,6 @@ export class LoginComponent implements AfterViewInit {
   }
 
   togglePasswordVisibility(): void {
-    this.passwordFieldType.update(type => (type === 'password' ? 'text' : 'password'));
+    this.passwordFieldType.update((type) => (type === 'password' ? 'text' : 'password'));
   }
 }

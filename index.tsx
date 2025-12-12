@@ -8,13 +8,19 @@ import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { routes } from './src/app.routes';
 import { authInterceptor } from './src/services/auth.interceptor';
+import { cacheInterceptor } from './src/services/cache.interceptor';
 
 registerLocaleData(localePt);
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideZonelessChangeDetection(),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(
+      withInterceptors([
+        cacheInterceptor, // Cache primeiro
+        authInterceptor, // Auth depois
+      ])
+    ),
     provideRouter(routes, withHashLocation()),
     { provide: LOCALE_ID, useValue: 'pt' },
   ],

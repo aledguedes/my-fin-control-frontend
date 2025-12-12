@@ -5,6 +5,7 @@ import { Observable, tap, forkJoin, throwError } from 'rxjs';
 // FIX: Import `map` operator from rxjs.
 import { catchError, map } from 'rxjs/operators';
 import { NotificationService } from './notification.service';
+import { CacheService } from './cache.service';
 import { environment } from '../environments/environment';
 
 @Injectable({
@@ -13,6 +14,7 @@ import { environment } from '../environments/environment';
 export class DataService {
   private http: HttpClient = inject(HttpClient);
   private notificationService = inject(NotificationService);
+  private cacheService = inject(CacheService);
   private apiUrl = `${environment.apiUrl}/financial`;
 
   private categories = signal<FinancialCategory[]>([]);
@@ -59,7 +61,12 @@ export class DataService {
   
   addTransaction(transactionData: Omit<Transaction, 'id'>): Observable<Transaction> {
     return this.http.post<Transaction>(`${this.apiUrl}/transactions`, transactionData).pipe(
-      tap(() => this.notificationService.show('Lançamento adicionado!', 'success')),
+      tap(() => {
+        // Invalidar cache relacionado
+        this.cacheService.clearByPattern('/summary/monthly-view');
+        this.cacheService.clearByPattern('/summary/installment-plans');
+        this.notificationService.show('Lançamento adicionado!', 'success');
+      }),
       catchError(err => {
         this.notificationService.show('Erro ao adicionar lançamento.', 'error');
         return throwError(() => err);
@@ -69,7 +76,12 @@ export class DataService {
 
   updateTransaction(transaction: Transaction): Observable<Transaction> {
     return this.http.put<Transaction>(`${this.apiUrl}/transactions/${transaction.id}`, transaction).pipe(
-      tap(() => this.notificationService.show('Lançamento atualizado!', 'success')),
+      tap(() => {
+        // Invalidar cache relacionado
+        this.cacheService.clearByPattern('/summary/monthly-view');
+        this.cacheService.clearByPattern('/summary/installment-plans');
+        this.notificationService.show('Lançamento atualizado!', 'success');
+      }),
       catchError(err => {
         this.notificationService.show('Erro ao atualizar lançamento.', 'error');
         return throwError(() => err);
@@ -79,7 +91,12 @@ export class DataService {
 
   deleteTransaction(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/transactions/${id}`).pipe(
-      tap(() => this.notificationService.show('Lançamento excluído!', 'success')),
+      tap(() => {
+        // Invalidar cache relacionado
+        this.cacheService.clearByPattern('/summary/monthly-view');
+        this.cacheService.clearByPattern('/summary/installment-plans');
+        this.notificationService.show('Lançamento excluído!', 'success');
+      }),
       catchError(err => {
         this.notificationService.show('Erro ao excluir lançamento.', 'error');
         return throwError(() => err);
@@ -90,6 +107,8 @@ export class DataService {
   addCategory(categoryData: Omit<FinancialCategory, 'id'>): Observable<FinancialCategory> {
     return this.http.post<FinancialCategory>(`${this.apiUrl}/categories`, categoryData).pipe(
       tap(newCategory => {
+        // Invalidar cache de categorias
+        this.cacheService.clearByPattern('/categories');
         this.categories.update(current => [...current, newCategory].sort((a,b) => a.name.localeCompare(b.name)));
         this.notificationService.show('Categoria adicionada!', 'success');
       }),

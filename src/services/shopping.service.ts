@@ -4,12 +4,14 @@ import { Observable, forkJoin, of, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { ShoppingListItem, ShoppingCategory, ShoppingList, Product, ProductUnit, ShoppingListResponse } from '../models/shopping.model';
 import { NotificationService } from './notification.service';
+import { CacheService } from './cache.service';
 import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ShoppingService {
   private http: HttpClient = inject(HttpClient);
   private notificationService = inject(NotificationService);
+  private cacheService = inject(CacheService);
   private apiUrl = `${environment.apiUrl}/shopping`;
 
   // State signals
@@ -84,6 +86,8 @@ export class ShoppingService {
   createList(name: string, initialProductIds: string[] = []): Observable<ShoppingList> {
     return this.http.post<ShoppingList>(`${this.apiUrl}/lists`, { name, items: initialProductIds }).pipe(
       tap(newList => {
+        // Invalidar cache de listas
+        this.cacheService.clearByPattern('/shopping/lists');
         this.shoppingLists.update(lists => [...lists, newList]);
         this.notificationService.show('Lista criada com sucesso!', 'success');
       })
@@ -166,6 +170,8 @@ export class ShoppingService {
 
     return this.http.put<ShoppingList>(`${this.apiUrl}/lists/${list.id}`, payload).pipe(
       tap(() => {
+        // Invalidar cache de listas
+        this.cacheService.clearByPattern('/shopping/lists');
         localStorage.removeItem(`shopping_list_draft_${list.id}`);
         if (showNotification) {
           this.notificationService.show('Alterações salvas com sucesso!', 'success');
@@ -183,6 +189,8 @@ export class ShoppingService {
   deleteList(listId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/lists/${listId}`).pipe(
         tap(() => {
+            // Invalidar cache de listas
+            this.cacheService.clearByPattern('/shopping/lists');
             this.shoppingLists.update(lists => lists.filter(l => l.id !== listId));
             if (this.activeListId() === listId) this.setActiveList(null);
             localStorage.removeItem(`shopping_list_draft_${listId}`);
@@ -194,6 +202,8 @@ export class ShoppingService {
   completeActiveList(list: ShoppingList): Observable<any> {
     return this.http.put<object>(`${this.apiUrl}/lists/${list.id}/complete`, list).pipe(
       tap(() => {
+        // Invalidar cache de listas
+        this.cacheService.clearByPattern('/shopping/lists');
         this.shoppingLists.update(lists =>
           lists.map(l => l.id === list.id ? { ...l, status: 'completed' } : l)
         );
@@ -206,6 +216,8 @@ export class ShoppingService {
   addShoppingCategory(name: string): Observable<ShoppingCategory> {
     return this.http.post<ShoppingCategory>(`${this.apiUrl}/categories`, { name }).pipe(
       tap(newCategory => {
+        // Invalidar cache de categorias
+        this.cacheService.clearByPattern('/shopping/categories');
         this.shoppingCategories.update(categories => [...categories, newCategory]);
       })
     );
@@ -214,6 +226,8 @@ export class ShoppingService {
   updateShoppingCategory(category: ShoppingCategory): Observable<ShoppingCategory> {
     return this.http.put<ShoppingCategory>(`${this.apiUrl}/categories/${category.id}`, category).pipe(
       tap((updatedCategory: ShoppingCategory) => {
+        // Invalidar cache de categorias
+        this.cacheService.clearByPattern('/shopping/categories');
         this.shoppingCategories.update(c => c.map(cat => cat.id === updatedCategory.id ? updatedCategory : cat));
       })
     );
@@ -222,6 +236,8 @@ export class ShoppingService {
   deleteShoppingCategory(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/categories/${id}`).pipe(
       tap(() => {
+        // Invalidar cache de categorias
+        this.cacheService.clearByPattern('/shopping/categories');
         this.shoppingCategories.update(categories => categories.filter(c => c.id !== id));
         this.notificationService.show('Categoria de compra excluída!', 'success');
       }),
@@ -235,6 +251,8 @@ export class ShoppingService {
   addProduct(productData: Omit<Product, 'id'>): Observable<Product> {
     return this.http.post<Product>(`${this.apiUrl}/products`, productData).pipe(
       tap(newProduct => {
+        // Invalidar cache de produtos
+        this.cacheService.clearByPattern('/shopping/products');
         this.products.update(products => [...products, newProduct].sort((a, b) => a.name.localeCompare(b.name)));
         this.notificationService.show('Produto adicionado!', 'success');
       }),
@@ -248,6 +266,8 @@ export class ShoppingService {
   updateProduct(product: Product): Observable<Product> {
     return this.http.put<Product>(`${this.apiUrl}/products/${product.id}`, product).pipe(
       tap(updatedProduct => {
+        // Invalidar cache de produtos
+        this.cacheService.clearByPattern('/shopping/products');
         this.products.update(products => 
           products.map(p => p.id === updatedProduct.id ? updatedProduct : p).sort((a, b) => a.name.localeCompare(b.name))
         );
@@ -263,6 +283,8 @@ export class ShoppingService {
   deleteProduct(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/products/${id}`).pipe(
       tap(() => {
+        // Invalidar cache de produtos
+        this.cacheService.clearByPattern('/shopping/products');
         this.products.update(products => products.filter(p => p.id !== id));
         this.notificationService.show('Produto excluído!', 'success');
       }),
@@ -279,6 +301,8 @@ export class ShoppingService {
 
     return this.http.post<ShoppingListItem[]>(`${this.apiUrl}/lists/${activeId}/items`, itemsData).pipe(
       tap((newItems: ShoppingListItem[]) => {
+        // Invalidar cache de listas
+        this.cacheService.clearByPattern('/shopping/lists');
         this.shoppingLists.update(lists => lists.map(l => {
           if (l.id === activeId) {
             return { ...l, items: [...l.items, ...newItems] };
