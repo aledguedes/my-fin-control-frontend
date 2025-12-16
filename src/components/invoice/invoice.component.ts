@@ -22,6 +22,11 @@ interface InvoiceItem {
   total: number;
 }
 
+interface FormattedInvoiceItem extends InvoiceItem {
+  formattedPrice: string;
+  formattedTotal: string;
+}
+
 @Component({
   selector: 'app-invoice',
   standalone: true,
@@ -136,7 +141,24 @@ export class InvoiceComponent implements OnInit {
     return this.invoiceItems().reduce((sum, item) => sum + item.total, 0);
   });
 
-  formatCurrency(amount: number): string {
+  formattedSubtotal = computed(() => {
+    return this.formatCurrency(this.subtotal());
+  });
+
+  formattedTotal = computed(() => {
+    const data = this.invoiceData();
+    return this.formatCurrency(data?.total_amount || 0);
+  });
+
+  formattedInvoiceItems = computed<FormattedInvoiceItem[]>(() => {
+    return this.invoiceItems().map((item) => ({
+      ...item,
+      formattedPrice: this.formatCurrency(item.price),
+      formattedTotal: this.formatCurrency(item.total),
+    }));
+  });
+
+  private formatCurrency(amount: number): string {
     return amount.toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
