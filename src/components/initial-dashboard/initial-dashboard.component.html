@@ -1,48 +1,104 @@
 <div class="text-center">
-    <h1 class="text-4xl font-bold text-neutral-800 mb-2">Bem-vindo ao My Fin Control</h1>
-    <p class="text-lg text-neutral-600 mb-12">Selecione um módulo para começar a gerenciar suas finanças.</p>
+  <h1 class="text-4xl font-bold text-neutral-800 mb-2">Bem-vindo ao MyFinControl</h1>
+  <p class="text-lg text-neutral-600 mb-12">
+    Selecione um módulo para começar a gerenciar suas finanças.
+  </p>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <!-- Financial Control Card -->
-        <a routerLink="/financial" class="group relative block p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 text-left cursor-pointer">
-            <div class="relative z-10">
-                <div class="mb-4">
-                    <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 text-indigo-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 8h6m-5 4h5m2 5H8a2 2 0 01-2-2V7a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                </div>
-                <h2 class="text-2xl font-bold text-neutral-900">Controle Financeiro</h2>
-                <p class="mt-2 text-neutral-600">Acompanhe suas receitas, despesas, parcelamentos e categorias em um só lugar.</p>
-                <div class="mt-6 font-semibold text-indigo-600 flex items-center">
-                    Acessar Módulo
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-            </div>
-        </a>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+    <!-- Financial Control Card -->
+    <a
+      routerLink="/financial"
+      class="group relative block p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 text-left cursor-pointer"
+    >
+      <div class="relative z-10">
+        <div class="mb-4">
+          <div
+            class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 text-indigo-600"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-8 w-8"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 8h6m-5 4h5m2 5H8a2 2 0 01-2-2V7a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-2xl font-bold text-neutral-900">Controle Financeiro</h2>
+        <p class="mt-2 text-neutral-600">
+          Acompanhe suas receitas, despesas, parcelamentos e categorias em um só lugar.
+        </p>
+        <div class="mt-6 font-semibold text-indigo-600 flex items-center">
+          Acessar Módulo
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+      </div>
+    </a>
 
-        <!-- Shopping List Card -->
-        <a routerLink="/shopping" class="group relative block p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 text-left cursor-pointer">
-            <div class="relative z-10">
-                 <div class="mb-4">
-                    <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100 text-emerald-600">
-                       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                           <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                       </svg>
-                    </div>
-                </div>
-                <h2 class="text-2xl font-bold text-neutral-900">Lista de Compras</h2>
-                <p class="mt-2 text-neutral-600">Crie listas, gerencie produtos e finalize suas compras de forma organizada.</p>
-                 <div class="mt-6 font-semibold text-emerald-600 flex items-center">
-                    Acessar Módulo
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-            </div>
-        </a>
-    </div>
+    <!-- Shopping List Card -->
+    <a
+      routerLink="/shopping"
+      class="group relative block p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 text-left cursor-pointer"
+    >
+      <div class="relative z-10">
+        <div class="mb-4">
+          <div
+            class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100 text-emerald-600"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-8 w-8"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-2xl font-bold text-neutral-900">Lista de Compras</h2>
+        <p class="mt-2 text-neutral-600">
+          Crie listas, gerencie produtos e finalize suas compras de forma organizada.
+        </p>
+        <div class="mt-6 font-semibold text-emerald-600 flex items-center">
+          Acessar Módulo
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+      </div>
+    </a>
+  </div>
 </div>

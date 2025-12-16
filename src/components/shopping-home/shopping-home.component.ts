@@ -15,6 +15,7 @@ import {
   FormControl,
 } from '@angular/forms';
 import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
+import { InvoiceComponent } from '../invoice/invoice.component';
 import { ShoppingService } from '../../services/shopping.service';
 import {
   ShoppingList,
@@ -25,6 +26,7 @@ import {
 } from '../../models/shopping.model';
 import { UiService } from '../../services/ui.service';
 import { Transaction } from '../../models/transaction.model';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
 @Component({
@@ -36,11 +38,14 @@ import { finalize } from 'rxjs';
 export class ShoppingHomeComponent implements OnInit {
   private uiService = inject(UiService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
   shoppingService = inject(ShoppingService);
 
   productUnits = productUnits;
   view = signal<'dashboard' | 'categories' | 'products'>('dashboard');
   isCreateListModalOpen = signal(false);
+  isDeleteConfirmModalOpen = signal(false);
+  listToDelete = signal<string | null>(null);
   editingcategory_id = signal<string | null>(null);
   editingProductId = signal<string | null>(null);
   expandedcategory_ids = signal<string[]>([]);
@@ -78,6 +83,13 @@ export class ShoppingHomeComponent implements OnInit {
         .sort((a, b) => a.name.localeCompare(b.name)),
     }));
     return grouped.filter((g) => g.products.length > 0);
+  });
+
+  listToDeleteName = computed(() => {
+    const listId = this.listToDelete();
+    if (!listId) return '';
+    const list = this.shoppingService.shoppingLists().find((l) => l.id === listId);
+    return list?.name || '';
   });
 
   ngOnInit(): void {
@@ -176,18 +188,35 @@ export class ShoppingHomeComponent implements OnInit {
   }
 
   deleteList(listId: string): void {
-    if (confirm('Tem certeza que deseja excluir esta lista?')) {
-      this.loadingAction.set(`delete-list-${listId}`);
-      this.shoppingService
-        .deleteList(listId)
-        .pipe(finalize(() => this.loadingAction.set(null)))
-        .subscribe();
-    }
+    this.listToDelete.set(listId);
+    this.isDeleteConfirmModalOpen.set(true);
+  }
+
+  confirmDeleteList(): void {
+    const listId = this.listToDelete();
+    if (!listId) return;
+
+    this.loadingAction.set(`delete-list-${listId}`);
+    this.shoppingService
+      .deleteList(listId)
+      .pipe(finalize(() => this.loadingAction.set(null)))
+      .subscribe(() => {
+        this.closeDeleteConfirmModal();
+      });
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.isDeleteConfirmModalOpen.set(false);
+    this.listToDelete.set(null);
   }
 
   goBackToDashboard(): void {
     this.shoppingService.setActiveList(null);
     this.view.set('dashboard');
+  }
+
+  openInvoiceModal(list: ShoppingList): void {
+    this.router.navigate(['/invoice', list.id]);
   }
 
   addCategory(): void {

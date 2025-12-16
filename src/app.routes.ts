@@ -5,6 +5,7 @@ import { LoginComponent } from './components/login/login.component';
 import { InitialDashboardComponent } from './components/initial-dashboard/initial-dashboard.component';
 import { FinancialHomeComponent } from './components/financial-home/financial-home.component';
 import { ShoppingHomeComponent } from './components/shopping-home/shopping-home.component';
+import { InvoiceComponent } from './components/invoice/invoice.component';
 import { MainLayoutComponent } from './components/main-layout/main-layout.component';
 import { initialDataResolver } from './app.resolver';
 
@@ -20,32 +21,36 @@ export const authGuard: CanActivateFn = () => {
 };
 
 export const routes: Routes = [
-    {
-        path: 'login',
-        component: LoginComponent,
+  {
+    path: 'login',
+    component: LoginComponent,
+  },
+  {
+    path: '',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    resolve: {
+      initialData: initialDataResolver,
     },
-    {
-        path: '',
-        component: MainLayoutComponent,
-        canActivate: [authGuard],
-        resolve: {
-          initialData: initialDataResolver
-        },
-        children: [
-            { path: 'dashboard', component: InitialDashboardComponent },
-            { 
-              path: 'financial', 
-              component: FinancialHomeComponent
-            },
-            { 
-              path: 'shopping', 
-              component: ShoppingHomeComponent
-            },
-            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-        ]
-    },
-    {
-        path: '**',
-        redirectTo: ''
-    }
+    children: [
+      { path: 'dashboard', component: InitialDashboardComponent },
+      {
+        path: 'financial',
+        component: FinancialHomeComponent,
+      },
+      {
+        path: 'shopping',
+        component: ShoppingHomeComponent,
+      },
+      {
+        path: 'invoice/:listId',
+        component: InvoiceComponent,
+      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    ],
+  },
+  {
+    path: '**',
+    redirectTo: '',
+  },
 ];

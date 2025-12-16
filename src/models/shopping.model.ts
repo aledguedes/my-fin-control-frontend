@@ -30,16 +30,30 @@ export interface Product {
 export interface ShoppingListItem {
   id: string;
   productId: string;
+  product_id?: string;
   shoppingListId?: string;
+  shopping_list_id?: string;
   name: string; // Denormalized for easier display
+  product_name?: string;
+  category_name?: string;
   quantity: number;
   price: number;
   checked: boolean;
   category_id?: string; // Denormalized for easier grouping
   unit: ProductUnit; // Denormalized for easier display
   userId?: string;
+  user_id?: string;
   createdAt?: string;
+  created_at?: string;
   updatedAt?: string;
+  updated_at?: string;
+  tbl_products?: {
+    name: string;
+    category_id: string;
+    tbl_shopping_categories?: {
+      name: string;
+    };
+  };
 }
 
 export interface ShoppingListResponse {

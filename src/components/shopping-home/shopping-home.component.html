@@ -1,5 +1,4 @@
 <div class="space-y-6">
-
   @if (shoppingService.activeList(); as activeList) {
     <!-- Active Shopping List View -->
     <div>
@@ -10,118 +9,272 @@
       @case ('dashboard') {
         <!-- Dashboard / Main Hub View -->
         <div class="space-y-8">
-           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h2 class="text-3xl font-bold text-neutral-800">Minhas Compras</h2>
-            </div>
-            
-            <!-- Action Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button (click)="openCreateListModal()" class="text-left p-4 bg-indigo-500 text-white rounded-xl shadow-lg hover:bg-indigo-600 transition-all transform hover:-translate-y-1 flex items-center gap-4">
-                    <div class="bg-white/20 p-3 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                    </div>
-                    <div>
-                        <span class="font-bold text-lg">Nova Lista</span>
-                        <p class="text-sm opacity-90">Comece a planejar sua próxima compra.</p>
-                    </div>
-                </button>
-                <button (click)="view.set('products')" class="text-left p-4 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center gap-4">
-                    <div class="bg-indigo-100 p-3 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
-                    </div>
-                    <div>
-                        <span class="font-bold text-lg text-neutral-800">Gerenciar Produtos</span>
-                         <p class="text-sm text-neutral-600">Cadastre e edite seus produtos.</p>
-                    </div>
-                </button>
-                <button (click)="view.set('categories')" class="text-left p-4 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center gap-4">
-                    <div class="bg-indigo-100 p-3 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a1 1 0 011-1h5a1 1 0 01.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg>
-                    </div>
-                    <div>
-                        <span class="font-bold text-lg text-neutral-800">Gerenciar Categorias</span>
-                        <p class="text-sm text-neutral-600">Organize os produtos por tipo.</p>
-                    </div>
-                </button>
-            </div>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h2 class="text-3xl font-bold text-neutral-800">Minhas Compras</h2>
+          </div>
 
-
-            <!-- Unified Shopping Lists -->
-            <div class="bg-white rounded-lg shadow-md">
-              <div class="p-4 border-b border-neutral-200">
-                <h3 class="text-lg font-semibold text-neutral-700">Minhas Listas de Compras</h3>
+          <!-- Action Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              (click)="openCreateListModal()"
+              class="text-left p-4 bg-indigo-500 text-white rounded-xl shadow-lg hover:bg-indigo-600 transition-all transform hover:-translate-y-1 flex items-center gap-4"
+            >
+              <div class="bg-white/20 p-3 rounded-lg">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-8 w-8"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
               </div>
-              @if (sortedShoppingLists().length > 0) {
-                <ul class="divide-y divide-neutral-200">
-                  @for(list of sortedShoppingLists(); track list.id) {
-                    <li class="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div class="flex-grow">
-                        <p class="font-semibold text-neutral-800">{{list.name}}</p>
-                        <p class="text-sm text-neutral-500">
-                          @if(list.status === 'completed') {
-                            Finalizada em: {{ list.completed_at | date:'dd/MM/yyyy' }}
-                          } @else {
-                            Criada em: {{ list.created_at | date:'dd/MM/yyyy' }}
-                          }
-                        </p>
-                      </div>
-                      <div class="flex items-center gap-4 w-full sm:w-auto">
-                        @if(list.status === 'completed') {
-                          <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full whitespace-nowrap">Finalizada</span>
-                          <p class="font-bold text-neutral-700 flex-grow text-right">R$ {{ list.total_amount | number:'1.2-2':'pt' }}</p>
-                        } @else {
-                          <span class="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full whitespace-nowrap">Pendente</span>
-                        }
-                        
-                        <div class="flex items-center gap-2">
-                           @if(list.status === 'pending') {
-                            <button (click)="selectList(list.id)" class="py-2 px-4 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium">
-                              Abrir
-                            </button>
-                           }
-                          <button (click)="deleteList(list.id)" [disabled]="loadingAction() === 'delete-list-' + list.id" class="p-2 rounded-md text-rose-500 hover:bg-rose-100 transition-colors disabled:opacity-50" aria-label="Excluir lista">
-                            @if(loadingAction() === 'delete-list-' + list.id) {
-                                <svg class="animate-spin h-5 w-5 text-rose-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            } @else {
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                            }
-                          </button>
-                        </div>
+              <div>
+                <span class="font-bold text-lg">Nova Lista</span>
+                <p class="text-sm opacity-90">Comece a planejar sua próxima compra.</p>
+              </div>
+            </button>
+            <button
+              (click)="view.set('products')"
+              class="text-left p-4 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center gap-4"
+            >
+              <div class="bg-indigo-100 p-3 rounded-lg">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-8 w-8 text-indigo-600"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                  <path
+                    fill-rule="evenodd"
+                    d="M4 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h6a1 1 0 100-2H7z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div>
+                <span class="font-bold text-lg text-neutral-800">Gerenciar Produtos</span>
+                <p class="text-sm text-neutral-600">Cadastre e edite seus produtos.</p>
+              </div>
+            </button>
+            <button
+              (click)="view.set('categories')"
+              class="text-left p-4 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center gap-4"
+            >
+              <div class="bg-indigo-100 p-3 rounded-lg">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-8 w-8 text-indigo-600"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a1 1 0 011-1h5a1 1 0 01.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div>
+                <span class="font-bold text-lg text-neutral-800">Gerenciar Categorias</span>
+                <p class="text-sm text-neutral-600">Organize os produtos por tipo.</p>
+              </div>
+            </button>
+          </div>
 
-                      </div>
-                    </li>
-                  }
-                </ul>
-              } @else {
-                <div class="text-center p-12 text-neutral-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h7.5M8.25 12h7.5m-7.5 5.25h7.5M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v18H3V3z" /></svg>
-                  <p class="mt-4 font-semibold">Nenhuma lista de compras criada.</p>
-                  <p class="text-sm">Clique em "Nova Lista" para começar.</p>
-                </div>
-              }
+          <!-- Unified Shopping Lists -->
+          <div class="bg-white rounded-lg shadow-md">
+            <div class="p-4 border-b border-neutral-200">
+              <h3 class="text-lg font-semibold text-neutral-700">Minhas Listas de Compras</h3>
             </div>
+            @if (sortedShoppingLists().length > 0) {
+              <ul class="divide-y divide-neutral-200">
+                @for (list of sortedShoppingLists(); track list.id) {
+                  <li
+                    class="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                  >
+                    <div class="flex-grow">
+                      <p class="font-semibold text-neutral-800">{{ list.name }}</p>
+                      <p class="text-sm text-neutral-500">
+                        @if (list.status === 'completed') {
+                          Finalizada em: {{ list.completed_at | date: 'dd/MM/yyyy' }}
+                        } @else {
+                          Criada em: {{ list.created_at | date: 'dd/MM/yyyy' }}
+                        }
+                      </p>
+                    </div>
+                    <div class="flex items-center gap-4 w-full sm:w-auto">
+                      @if (list.status === 'completed') {
+                        <span
+                          class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full whitespace-nowrap"
+                        >
+                          Finalizada
+                        </span>
+                        <p class="font-bold text-neutral-700 flex-grow text-right">
+                          R$ {{ list.total_amount | number: '1.2-2' : 'pt' }}
+                        </p>
+                      } @else {
+                        <span
+                          class="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full whitespace-nowrap"
+                        >
+                          Pendente
+                        </span>
+                      }
+
+                      <div class="flex items-center gap-2">
+                        @if (list.status === 'pending') {
+                          <button
+                            (click)="selectList(list.id)"
+                            class="py-2 px-4 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium"
+                          >
+                            Abrir
+                          </button>
+                        }
+                        @if (list.status === 'completed') {
+                          <button
+                            (click)="openInvoiceModal(list)"
+                            class="py-2 px-4 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition-colors text-sm font-medium"
+                          >
+                            Ver Fatura
+                          </button>
+                        }
+                        <button
+                          (click)="deleteList(list.id)"
+                          [disabled]="loadingAction() === 'delete-list-' + list.id"
+                          class="p-2 rounded-md text-rose-500 hover:bg-rose-100 transition-colors disabled:opacity-50"
+                          aria-label="Excluir lista"
+                        >
+                          @if (loadingAction() === 'delete-list-' + list.id) {
+                            <svg
+                              class="animate-spin h-5 w-5 text-rose-600"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                              ></circle>
+                              <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                          } @else {
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-5 w-5"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                          }
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <div class="text-center p-12 text-neutral-500">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="mx-auto h-12 w-12 text-neutral-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8.25 6.75h7.5M8.25 12h7.5m-7.5 5.25h7.5M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+                  />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v18H3V3z" />
+                </svg>
+                <p class="mt-4 font-semibold">Nenhuma lista de compras criada.</p>
+                <p class="text-sm">Clique em "Nova Lista" para começar.</p>
+              </div>
+            }
+          </div>
         </div>
       }
       @case ('categories') {
         <!-- Category Management View -->
         <div class="space-y-6">
-           <div class="flex items-center justify-between">
-             <h2 class="text-3xl font-bold text-neutral-800">Gerenciar Categorias</h2>
-             <button (click)="goBackToDashboard()" class="flex items-center gap-2 text-sm font-medium text-indigo-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-               Voltar ao Painel
-             </button>
+          <div class="flex items-center justify-between">
+            <h2 class="text-3xl font-bold text-neutral-800">Gerenciar Categorias</h2>
+            <button
+              (click)="goBackToDashboard()"
+              class="flex items-center gap-2 text-sm font-medium text-indigo-600"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Voltar ao Painel
+            </button>
           </div>
           <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-lg font-semibold text-neutral-700 mb-3">Adicionar Categoria</h3>
-            <form [formGroup]="categoryForm" (ngSubmit)="addCategory()" class="flex flex-col sm:flex-row gap-3">
-              <input type="text" formControlName="name" class="flex-grow block w-full rounded-md border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4" placeholder="Ex: Higiene Pessoal">
-              <button type="submit" [disabled]="categoryForm.invalid || loadingAction() === 'add-category'" class="w-full sm:w-auto inline-flex justify-center py-3 px-5 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 min-w-[120px]">
-                @if(loadingAction() === 'add-category') {
-                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <form
+              [formGroup]="categoryForm"
+              (ngSubmit)="addCategory()"
+              class="flex flex-col sm:flex-row gap-3"
+            >
+              <input
+                type="text"
+                formControlName="name"
+                class="flex-grow block w-full rounded-md border border-neutral-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4"
+                placeholder="Ex: Higiene Pessoal"
+              />
+              <button
+                type="submit"
+                [disabled]="categoryForm.invalid || loadingAction() === 'add-category'"
+                class="w-full sm:w-auto inline-flex justify-center py-3 px-5 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 min-w-[120px]"
+              >
+                @if (loadingAction() === 'add-category') {
+                  <svg
+                    class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
                   <span>...</span>
                 } @else {
                   <span>Adicionar</span>
@@ -131,23 +284,61 @@
           </div>
           <div class="bg-white rounded-lg shadow-md">
             <ul class="divide-y divide-neutral-200">
-              @for(category of shoppingService.shoppingCategories(); track category.id) {
+              @for (category of shoppingService.shoppingCategories(); track category.id) {
                 <li class="p-4">
                   @if (editingcategory_id() === category.id) {
-                    <form [formGroup]="editCategoryForm" (ngSubmit)="saveCategory(category.id)" class="flex items-center gap-3">
-                      <input type="text" formControlName="name" class="flex-grow block w-full rounded-md border-neutral-300 shadow-sm py-2 px-3">
-                      <button type="submit" [disabled]="editCategoryForm.invalid || loadingAction() === 'save-category-' + category.id" class="py-2 px-3 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300">
-                        @if(loadingAction() === 'save-category-' + category.id) { <span>...</span> } @else { <span>Salvar</span> }
+                    <form
+                      [formGroup]="editCategoryForm"
+                      (ngSubmit)="saveCategory(category.id)"
+                      class="flex items-center gap-3"
+                    >
+                      <input
+                        type="text"
+                        formControlName="name"
+                        class="flex-grow block w-full rounded-md border border-neutral-200 shadow-sm py-2 px-3"
+                      />
+                      <button
+                        type="submit"
+                        [disabled]="
+                          editCategoryForm.invalid ||
+                          loadingAction() === 'save-category-' + category.id
+                        "
+                        class="py-2 px-3 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300"
+                      >
+                        @if (loadingAction() === 'save-category-' + category.id) {
+                          <span>...</span>
+                        } @else {
+                          <span>Salvar</span>
+                        }
                       </button>
-                      <button type="button" (click)="cancelEditCategory()" class="py-2 px-3 rounded-md bg-neutral-100 hover:bg-neutral-200">Cancelar</button>
+                      <button
+                        type="button"
+                        (click)="cancelEditCategory()"
+                        class="py-2 px-3 rounded-md bg-neutral-100 hover:bg-neutral-200"
+                      >
+                        Cancelar
+                      </button>
                     </form>
                   } @else {
                     <div class="flex justify-between items-center">
                       <p class="font-medium text-neutral-800">{{ category.name }}</p>
                       <div class="flex items-center gap-3">
-                        <button (click)="startEditCategory(category)" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Editar</button>
-                        <button (click)="deleteCategory(category.id)" [disabled]="loadingAction() === 'delete-category-' + category.id" class="text-sm font-medium text-rose-600 hover:text-rose-800 disabled:opacity-50">
-                          @if(loadingAction() === 'delete-category-' + category.id) { <span>...</span> } @else { <span>Excluir</span> }
+                        <button
+                          (click)="startEditCategory(category)"
+                          class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          (click)="deleteCategory(category.id)"
+                          [disabled]="loadingAction() === 'delete-category-' + category.id"
+                          class="text-sm font-medium text-rose-600 hover:text-rose-800 disabled:opacity-50"
+                        >
+                          @if (loadingAction() === 'delete-category-' + category.id) {
+                            <span>...</span>
+                          } @else {
+                            <span>Excluir</span>
+                          }
                         </button>
                       </div>
                     </div>
@@ -161,88 +352,229 @@
       @case ('products') {
         <!-- Product Management View -->
         <div class="space-y-6">
-           <div class="flex items-center justify-between">
-             <h2 class="text-3xl font-bold text-neutral-800">Gerenciar Produtos</h2>
-             <button (click)="goBackToDashboard()" class="flex items-center gap-2 text-sm font-medium text-indigo-600">
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-               Voltar ao Painel
-             </button>
-           </div>
-           <div class="bg-white p-6 rounded-lg shadow-md">
-             <h3 class="text-lg font-semibold text-neutral-700 mb-3">Adicionar Produto</h3>
-             <form [formGroup]="productForm" (ngSubmit)="addProduct()" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
-               <div class="sm:col-span-2">
-                 <label for="newProductName" class="block text-sm font-medium text-neutral-700">Nome do Produto</label>
-                 <input type="text" id="newProductName" formControlName="name" class="mt-1 block w-full rounded-md border-neutral-300 shadow-sm py-2 px-3" placeholder="Ex: Arroz Integral 5kg">
-               </div>
-               <div>
-                 <label for="newProductCategory" class="block text-sm font-medium text-neutral-700">Categoria</label>
-                 <select id="newProductCategory" formControlName="category_id" class="mt-1 block w-full rounded-md border-neutral-300 shadow-sm py-2 px-3">
-                   <option [ngValue]="null">Sem Categoria</option>
-                   @for(cat of shoppingService.shoppingCategories(); track cat.id) { <option [value]="cat.id">{{cat.name}}</option> }
-                 </select>
-               </div>
-               <div>
-                  <label for="newProductUnit" class="block text-sm font-medium text-neutral-700">Unidade</label>
-                  <select id="newProductUnit" formControlName="unit" class="mt-1 block w-full rounded-md border-neutral-300 shadow-sm py-2 px-3">
-                    @for(unit of productUnits; track unit.value) { <option [value]="unit.value">{{ unit.label }}</option> }
-                  </select>
-               </div>
-               <div class="sm:col-span-4 sm:text-right">
-                <button type="submit" [disabled]="productForm.invalid || loadingAction() === 'add-product'" class="w-full sm:w-auto inline-flex justify-center py-2 px-4 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 min-w-[150px]">
-                  @if(loadingAction() === 'add-product') {
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          <div class="flex items-center justify-between">
+            <h2 class="text-3xl font-bold text-neutral-800">Gerenciar Produtos</h2>
+            <button
+              (click)="goBackToDashboard()"
+              class="flex items-center gap-2 text-sm font-medium text-indigo-600"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Voltar ao Painel
+            </button>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-neutral-700 mb-3">Adicionar Produto</h3>
+            <form
+              [formGroup]="productForm"
+              (ngSubmit)="addProduct()"
+              class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end"
+            >
+              <div class="sm:col-span-2">
+                <label for="newProductName" class="block text-sm font-medium text-neutral-700">
+                  Nome do Produto
+                </label>
+                <input
+                  type="text"
+                  id="newProductName"
+                  formControlName="name"
+                  class="mt-1 block w-full rounded-md border border-neutral-200 shadow-sm py-2 px-3"
+                  placeholder="Ex: Arroz Integral 5kg"
+                />
+              </div>
+              <div>
+                <label for="newProductCategory" class="block text-sm font-medium text-neutral-700">
+                  Categoria
+                </label>
+                <select
+                  id="newProductCategory"
+                  formControlName="category_id"
+                  class="mt-1 block w-full rounded-md border border-neutral-200 shadow-sm py-2 px-3"
+                >
+                  <option [ngValue]="null">Sem Categoria</option>
+                  @for (cat of shoppingService.shoppingCategories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.name }}</option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label for="newProductUnit" class="block text-sm font-medium text-neutral-700">
+                  Unidade
+                </label>
+                <select
+                  id="newProductUnit"
+                  formControlName="unit"
+                  class="mt-1 block w-full rounded-md border border-neutral-200 shadow-sm py-2 px-3"
+                >
+                  @for (unit of productUnits; track unit.value) {
+                    <option [value]="unit.value">{{ unit.label }}</option>
+                  }
+                </select>
+              </div>
+              <div class="sm:col-span-4 sm:text-right">
+                <button
+                  type="submit"
+                  [disabled]="productForm.invalid || loadingAction() === 'add-product'"
+                  class="w-full sm:w-auto inline-flex justify-center py-2 px-4 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 min-w-[150px]"
+                >
+                  @if (loadingAction() === 'add-product') {
+                    <svg
+                      class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
                     <span>...</span>
                   } @else {
                     <span>Adicionar Produto</span>
                   }
                 </button>
-               </div>
-             </form>
-           </div>
-           <div class="bg-white rounded-lg shadow-md overflow-hidden">
-             @if (productsGroupedByCategory().length > 0) {
+              </div>
+            </form>
+          </div>
+          <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            @if (productsGroupedByCategory().length > 0) {
               <ul class="divide-y divide-neutral-200">
-                @for(group of productsGroupedByCategory(); track group.id) {
+                @for (group of productsGroupedByCategory(); track group.id) {
                   <li>
-                    <button (click)="toggleCategory(group.id)" class="w-full flex justify-between items-center p-4 text-left hover:bg-neutral-50 transition-colors focus:outline-none focus:bg-neutral-100">
+                    <button
+                      (click)="toggleCategory(group.id)"
+                      class="w-full flex justify-between items-center p-4 text-left hover:bg-neutral-50 transition-colors focus:outline-none focus:bg-neutral-100"
+                    >
                       <div class="flex items-center">
                         <h4 class="font-bold text-lg text-indigo-700">{{ group.name }}</h4>
-                        <span class="ml-3 bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-1 rounded-full">{{ group.products.length }} {{ group.products.length === 1 ? 'produto' : 'produtos' }}</span>
+                        <span
+                          class="ml-3 bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-1 rounded-full"
+                        >
+                          {{ group.products.length }}
+                          {{ group.products.length === 1 ? 'produto' : 'produtos' }}
+                        </span>
                       </div>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-500 transition-transform transform" [class.rotate-180]="isCategoryExpanded(group.id)" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6 text-neutral-500 transition-transform transform"
+                        [class.rotate-180]="isCategoryExpanded(group.id)"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clip-rule="evenodd"
+                        />
                       </svg>
                     </button>
-                    @if(isCategoryExpanded(group.id)) {
+                    @if (isCategoryExpanded(group.id)) {
                       <div class="bg-neutral-50">
                         <ul class="divide-y divide-neutral-200">
-                          @for(product of group.products; track product.id) {
+                          @for (product of group.products; track product.id) {
                             <li class="px-4 py-3 ml-4">
                               @if (editingProductId() === product.id) {
-                                <form [formGroup]="editProductForm" (ngSubmit)="saveProduct()" class="flex flex-wrap items-center gap-3">
-                                  <input type="text" formControlName="name" class="flex-grow min-w-[200px] block w-full sm:w-auto rounded-md border-neutral-300 shadow-sm py-2 px-3">
-                                  <select formControlName="category_id" class="rounded-md border-neutral-300 shadow-sm py-2 px-3">
+                                <form
+                                  [formGroup]="editProductForm"
+                                  (ngSubmit)="saveProduct()"
+                                  class="flex flex-wrap items-center gap-3"
+                                >
+                                  <input
+                                    type="text"
+                                    formControlName="name"
+                                    class="flex-grow min-w-[200px] block w-full sm:w-auto rounded-md border border-neutral-200 shadow-sm py-2 px-3"
+                                  />
+                                  <select
+                                    formControlName="category_id"
+                                    class="rounded-md border border-neutral-200 shadow-sm py-2 px-3"
+                                  >
                                     <option [ngValue]="null">Sem Categoria</option>
-                                    @for(cat of shoppingService.shoppingCategories(); track cat.id) { <option [value]="cat.id">{{cat.name}}</option> }
+                                    @for (
+                                      cat of shoppingService.shoppingCategories();
+                                      track cat.id
+                                    ) {
+                                      <option [value]="cat.id">{{ cat.name }}</option>
+                                    }
                                   </select>
-                                  <select formControlName="unit" class="rounded-md border-neutral-300 shadow-sm py-2 px-3">
-                                    @for(unit of productUnits; track unit.value) { <option [value]="unit.value">{{ unit.label }}</option> }
+                                  <select
+                                    formControlName="unit"
+                                    class="rounded-md border border-neutral-200 shadow-sm py-2 px-3"
+                                  >
+                                    @for (unit of productUnits; track unit.value) {
+                                      <option [value]="unit.value">{{ unit.label }}</option>
+                                    }
                                   </select>
                                   <div class="flex gap-2 ml-auto">
-                                      <button type="submit" [disabled]="editProductForm.invalid || loadingAction() === 'save-product-' + product.id" class="py-2 px-3 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300">
-                                        @if(loadingAction() === 'save-product-' + product.id) { <span>...</span> } @else { <span>Salvar</span> }
-                                      </button>
-                                      <button type="button" (click)="cancelEditProduct()" class="py-2 px-3 rounded-md bg-neutral-100 hover:bg-neutral-200">Cancelar</button>
+                                    <button
+                                      type="submit"
+                                      [disabled]="
+                                        editProductForm.invalid ||
+                                        loadingAction() === 'save-product-' + product.id
+                                      "
+                                      class="py-2 px-3 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300"
+                                    >
+                                      @if (loadingAction() === 'save-product-' + product.id) {
+                                        <span>...</span>
+                                      } @else {
+                                        <span>Salvar</span>
+                                      }
+                                    </button>
+                                    <button
+                                      type="button"
+                                      (click)="cancelEditProduct()"
+                                      class="py-2 px-3 rounded-md bg-neutral-100 hover:bg-neutral-200"
+                                    >
+                                      Cancelar
+                                    </button>
                                   </div>
                                 </form>
                               } @else {
                                 <div class="flex justify-between items-center">
-                                  <p class="text-neutral-800">{{ product.name }} <span class="text-sm text-neutral-500">({{ getUnitLabel(product.unit) }})</span></p>
+                                  <p class="text-neutral-800">
+                                    {{ product.name }}
+                                    <span class="text-sm text-neutral-500">
+                                      ({{ getUnitLabel(product.unit) }})
+                                    </span>
+                                  </p>
                                   <div class="flex items-center gap-3">
-                                    <button (click)="startEditProduct(product)" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Editar</button>
-                                    <button (click)="deleteProduct(product.id)" [disabled]="loadingAction() === 'delete-product-' + product.id" class="text-sm font-medium text-rose-600 hover:text-rose-800 disabled:opacity-50">
-                                      @if(loadingAction() === 'delete-product-' + product.id) { <span>...</span> } @else { <span>Excluir</span> }
+                                    <button
+                                      (click)="startEditProduct(product)"
+                                      class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                                    >
+                                      Editar
+                                    </button>
+                                    <button
+                                      (click)="deleteProduct(product.id)"
+                                      [disabled]="
+                                        loadingAction() === 'delete-product-' + product.id
+                                      "
+                                      class="text-sm font-medium text-rose-600 hover:text-rose-800 disabled:opacity-50"
+                                    >
+                                      @if (loadingAction() === 'delete-product-' + product.id) {
+                                        <span>...</span>
+                                      } @else {
+                                        <span>Excluir</span>
+                                      }
                                     </button>
                                   </div>
                                 </div>
@@ -255,72 +587,207 @@
                   </li>
                 }
               </ul>
-             } @else {
-                <div class="text-center p-12 text-neutral-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-                  <p class="mt-4 font-semibold">Nenhum produto cadastrado.</p>
-                  <p class="text-sm">Adicione um novo produto no formulário acima para começar.</p>
-                </div>
-             }
-           </div>
+            } @else {
+              <div class="text-center p-12 text-neutral-500">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="mx-auto h-12 w-12 text-neutral-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path
+                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                  />
+                </svg>
+                <p class="mt-4 font-semibold">Nenhum produto cadastrado.</p>
+                <p class="text-sm">Adicione um novo produto no formulário acima para começar.</p>
+              </div>
+            }
+          </div>
         </div>
       }
     }
   }
 
   <!-- CREATE LIST MODAL -->
-  @if(isCreateListModalOpen()) {
-    <div class="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-center p-4" (click)="closeCreateListModal()">
-      <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl relative max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
-        <button (click)="closeCreateListModal()" class="absolute top-3 right-3 text-neutral-400 hover:text-neutral-600 transition-colors z-10">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+  @if (isCreateListModalOpen()) {
+    <div
+      class="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-center p-4"
+      (click)="closeCreateListModal()"
+    >
+      <div
+        class="bg-white rounded-lg shadow-2xl w-full max-w-2xl relative max-h-[90vh] flex flex-col"
+        (click)="$event.stopPropagation()"
+      >
+        <button
+          (click)="closeCreateListModal()"
+          class="absolute top-3 right-3 text-neutral-400 hover:text-neutral-600 transition-colors z-10"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
         </button>
         <div class="p-6 border-b">
           <h2 class="text-2xl font-bold text-neutral-800">Criar Nova Lista de Compras</h2>
         </div>
         <div class="p-6 flex-grow overflow-y-auto">
           <form [formGroup]="createListForm" (ngSubmit)="createList()">
-              <div class="space-y-6">
-                <div>
-                  <label for="newListNameModal" class="block text-sm font-medium text-neutral-700">Nome da Lista</label>
-                  <input type="text" id="newListNameModal" formControlName="name" class="mt-1 block w-full rounded-md border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base" placeholder="Ex: Compras da Semana">
-                </div>
-                
-                @if(shoppingService.products().length > 0) {
-                  <div>
-                    <h4 class="text-sm font-medium text-neutral-600 mb-3">Adicionar Rápido (Opcional)</h4>
-                     <div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-2 border rounded-md">
-                        @for(product of shoppingService.products(); track product.id) {
-                          <button 
-                            type="button" 
-                            (click)="togglePreselectedProduct(product.id)" 
-                            class="px-3 py-1 text-sm rounded-full transition-colors"
-                            [class.bg-indigo-600]="isProductPreSelected(product.id)"
-                            [class.text-white]="isProductPreSelected(product.id)"
-                            [class.bg-indigo-100]="!isProductPreSelected(product.id)"
-                            [class.text-indigo-700]="!isProductPreSelected(product.id)"
-                            [class.hover:bg-indigo-200]="!isProductPreSelected(product.id)">
-                            {{ product.name }}
-                          </button>
-                        }
-                      </div>
-                  </div>
-                }
+            <div class="space-y-6">
+              <div>
+                <label for="newListNameModal" class="block text-sm font-medium text-neutral-700">
+                  Nome da Lista
+                </label>
+                <input
+                  type="text"
+                  id="newListNameModal"
+                  formControlName="name"
+                  class="mt-1 block w-full rounded-md border border-neutral-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 text-base"
+                  placeholder="Ex: Compras da Semana"
+                />
               </div>
+
+              @if (shoppingService.products().length > 0) {
+                <div>
+                  <h4 class="text-sm font-medium text-neutral-600 mb-3">
+                    Adicionar Rápido (Opcional)
+                  </h4>
+                  <div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-2 border rounded-md">
+                    @for (product of shoppingService.products(); track product.id) {
+                      <button
+                        type="button"
+                        (click)="togglePreselectedProduct(product.id)"
+                        class="px-3 py-1 text-sm rounded-full transition-colors"
+                        [class.bg-indigo-600]="isProductPreSelected(product.id)"
+                        [class.text-white]="isProductPreSelected(product.id)"
+                        [class.bg-indigo-100]="!isProductPreSelected(product.id)"
+                        [class.text-indigo-700]="!isProductPreSelected(product.id)"
+                        [class.hover:bg-indigo-200]="!isProductPreSelected(product.id)"
+                      >
+                        {{ product.name }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
           </form>
         </div>
         <div class="p-6 border-t bg-neutral-50 flex justify-end gap-3 rounded-b-lg">
-            <button type="button" (click)="closeCreateListModal()" class="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md shadow-sm hover:bg-neutral-50">
-              Cancelar
-            </button>
-            <button (click)="createList()" [disabled]="createListForm.invalid || loadingAction() === 'create-list'" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 disabled:bg-indigo-300 min-w-[170px]">
-              @if(loadingAction() === 'create-list') {
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                <span>Criando...</span>
-              } @else {
-                <span>Criar e Abrir Lista</span>
-              }
-            </button>
+          <button
+            type="button"
+            (click)="closeCreateListModal()"
+            class="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md shadow-sm hover:bg-neutral-50"
+          >
+            Cancelar
+          </button>
+          <button
+            (click)="createList()"
+            [disabled]="createListForm.invalid || loadingAction() === 'create-list'"
+            class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 disabled:bg-indigo-300 min-w-[170px]"
+          >
+            @if (loadingAction() === 'create-list') {
+              <svg
+                class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span>Criando...</span>
+            } @else {
+              <span>Criar e Abrir Lista</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- DELETE CONFIRM MODAL -->
+  @if (isDeleteConfirmModalOpen()) {
+    <div
+      class="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-center p-4"
+      (click)="closeDeleteConfirmModal()"
+    >
+      <div
+        class="bg-white rounded-lg shadow-2xl w-full max-w-md relative"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="p-6 border-b">
+          <h2 class="text-xl font-bold text-neutral-800">Confirmar Exclusão</h2>
+        </div>
+        <div class="p-6">
+          <p class="text-neutral-700 mb-2">
+            Tem certeza que deseja excluir a lista
+            <span class="font-semibold text-neutral-900">"{{ listToDeleteName() }}"</span>?
+          </p>
+          <p class="text-sm text-neutral-500">Esta ação não pode ser desfeita.</p>
+        </div>
+        <div class="p-6 border-t bg-neutral-50 flex justify-end gap-3 rounded-b-lg">
+          <button
+            type="button"
+            (click)="closeDeleteConfirmModal()"
+            class="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md shadow-sm hover:bg-neutral-50"
+          >
+            Cancelar
+          </button>
+          <button
+            (click)="confirmDeleteList()"
+            [disabled]="loadingAction() === 'delete-list-' + listToDelete()"
+            class="px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-transparent rounded-md shadow-sm hover:bg-rose-700 disabled:bg-rose-300 min-w-[120px]"
+          >
+            @if (loadingAction() === 'delete-list-' + listToDelete()) {
+              <svg
+                class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span>Excluindo...</span>
+            } @else {
+              <span>Excluir</span>
+            }
+          </button>
         </div>
       </div>
     </div>
