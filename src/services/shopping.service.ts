@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin, of, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, map } from 'rxjs/operators';
 import { ShoppingListItem, ShoppingCategory, ShoppingList, Product, ProductUnit, ShoppingListResponse } from '../models/shopping.model';
 import { NotificationService } from './notification.service';
 import { CacheService } from './cache.service';
@@ -103,54 +103,77 @@ export class ShoppingService {
     this.loadAndSetActiveList(listId);
   }
 
+  loadListDetails(listId: string): Observable<ShoppingList> {
+    return this.http.get<{ list: ShoppingList }>(`${this.apiUrl}/lists/${listId}`).pipe(
+      map((response) => {
+        const rawList = response.list;
+        
+        // Map API response (snake_case) to Frontend Model (camelCase)
+        const mappedList: ShoppingList = {
+          id: String(rawList.id),
+          name: rawList.name,
+          status: rawList.status,
+          created_at: rawList.created_at,
+          completed_at: rawList.completed_at,
+          total_amount: rawList.total_amount,
+          user_id: rawList.user_id,
+          updated_at: rawList.updated_at,
+          items: (rawList.items || []).map((item: any) => {
+            // Try to find category_id from the item itself, or lookup in loaded products
+            let category_id = item.category_id ? String(item.category_id) : undefined;
+            
+            if (!category_id && item.product_id) {
+                const product = this.products().find(p => String(p.id) === String(item.product_id));
+                if (product && product.category_id) {
+                    category_id = String(product.category_id);
+                }
+            }
+
+            return {
+              id: String(item.id),
+              quantity: item.quantity,
+              price: item.price,
+              checked: Boolean(item.checked), // Ensure boolean
+              productId: String(item.product_id),
+              shoppingListId: String(item.shopping_list_id),
+              name: item.product_name, // Denormalized name
+              product_name: item.product_name || item.name,
+              category_id: category_id,
+              category_name: item.category_name || '',
+              unit: item.unit || 'un',
+              createdAt: item.created_at,
+              updatedAt: item.updated_at
+            };
+          })
+        };
+
+        // Atualizar o signal de listas
+        this.shoppingLists.update(lists => {
+          const existingIndex = lists.findIndex(l => l.id === listId);
+          if (existingIndex >= 0) {
+            return lists.map(l => l.id === listId ? mappedList : l);
+          } else {
+            return [...lists, mappedList];
+          }
+        });
+
+        return mappedList;
+      }),
+      catchError((err) => {
+        console.error('Error loading list details', err);
+        this.notificationService.show('Erro ao carregar detalhes da lista.', 'error');
+        return throwError(() => err);
+      })
+    );
+  }
+
   private loadAndSetActiveList(listId: string): void {
-      this.http.get<{ list: ShoppingList }>(`${this.apiUrl}/lists/${listId}`).subscribe({
-        next: (response) => {
-          const rawList = response.list;
-          
-          // Map API response (snake_case) to Frontend Model (camelCase)
-          const mappedList: ShoppingList = {
-            id: String(rawList.id),
-            name: rawList.name,
-            status: rawList.status,
-            created_at: rawList.created_at,
-            completed_at: rawList.completed_at,
-            total_amount: rawList.total_amount,
-            user_id: rawList.user_id,
-            updated_at: rawList.updated_at,
-            items: (rawList.items || []).map((item: any) => {
-              // Try to find category_id from the item itself, or lookup in loaded products
-              let category_id = item.category_id ? String(item.category_id) : undefined;
-              
-              if (!category_id && item.product_id) {
-                  const product = this.products().find(p => String(p.id) === String(item.product_id));
-                  if (product && product.category_id) {
-                      category_id = String(product.category_id);
-                  }
-              }
-
-              return {
-                id: String(item.id),
-                quantity: item.quantity,
-                price: item.price,
-                checked: Boolean(item.checked), // Ensure boolean
-                productId: String(item.product_id),
-                shoppingListId: String(item.shopping_list_id),
-                name: item.product_name, // Denormalized name
-                category_id: category_id,
-                unit: 'un', // Defaulting as API sample didn't show unit
-                createdAt: item.created_at,
-                updatedAt: item.updated_at
-              };
-            })
-          };
-
-          this.shoppingLists.update(lists => lists.map(l => l.id === listId ? mappedList : l));
+      this.loadListDetails(listId).subscribe({
+        next: () => {
           this.activeListId.set(listId);
         },
-        error: (err) => {
-          console.error('Error loading list details', err);
-          this.notificationService.show('Erro ao carregar detalhes da lista.', 'error');
+        error: () => {
+          // Error already handled in loadListDetails
         }
       });
   }

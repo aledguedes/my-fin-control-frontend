@@ -40,11 +40,7 @@ export class InvoiceComponent implements OnInit {
   invoiceData = computed<ShoppingList | null>(() => {
     const id = this.listId();
     if (!id) return null;
-    return (
-      this.shoppingService
-        .shoppingLists()
-        .find((list) => list.id === id) || null
-    );
+    return this.shoppingService.shoppingLists().find((list) => list.id === id) || null;
   });
 
   ngOnInit(): void {
@@ -54,6 +50,21 @@ export class InvoiceComponent implements OnInit {
       return;
     }
     this.listId.set(listId);
+
+    // Verificar se a lista já tem items carregados
+    const existingList = this.shoppingService.shoppingLists().find((l) => l.id === listId);
+
+    // Se a lista não existe ou não tem items, carregar os detalhes da API
+    if (!existingList || !existingList.items || existingList.items.length === 0) {
+      this.shoppingService.loadListDetails(listId).subscribe({
+        next: () => {
+          // Lista carregada e atualizada no signal, o computed invoiceData() será atualizado automaticamente
+        },
+        error: (err) => {
+          console.error('Erro ao carregar detalhes da lista:', err);
+        },
+      });
+    }
   }
 
   // Computed properties
