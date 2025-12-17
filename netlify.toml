@@ -10,3 +10,7 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Variáveis de ambiente opcionais (configure no painel do Netlify se necessário):
+# NG_APP_API_URL - URL da API (padrão: https://api-fin-control.vercel.app/api/v1)
+# NG_APP_GOOGLE_CLIENT_ID - ID do cliente Google OAuth
+

@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "ng serve",
-    "build": "ng build",
+    "setup:env": "node scripts/setup-env.js",
+    "dev": "node scripts/setup-env.js && ng serve",
+    "build": "node scripts/setup-env.js && node scripts/replace-env.js && ng build",
+    "build:prod": "node scripts/setup-env.js && node scripts/replace-env.js && ng build --configuration=production",
     "preview": "ng serve --configuration=production",
     "lint": "eslint \"src/**/*.{ts,html}\"",
     "lint:fix": "npm run lint -- --fix",
