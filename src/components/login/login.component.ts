@@ -35,8 +35,8 @@ export class LoginComponent implements AfterViewInit {
   private elementRef = inject(ElementRef);
 
   loginForm = new FormGroup({
-    username: new FormControl('admin@fin-control.com', [Validators.required]),
-    password: new FormControl('Thaeme1507#', [Validators.required]),
+    username: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required]),
   });
 
   ngAfterViewInit(): void {
