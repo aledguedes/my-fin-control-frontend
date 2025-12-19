@@ -12,18 +12,21 @@
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
         <div>
-          <label for="username" class="block text-sm font-medium text-neutral-700">Usuário</label>
+          <label for="email" class="block text-sm font-medium text-neutral-700">E-mail</label>
           <input
-            id="username"
-            type="text"
-            formControlName="username"
+            id="email"
+            type="email"
+            formControlName="email"
             required
             class="mt-1 block w-full rounded-md border-neutral-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-3 px-4 text-base"
             [class.border-red-500]="
-              loginForm.get('username')?.invalid && loginForm.get('username')?.touched
+              loginForm.get('email')?.invalid && loginForm.get('email')?.touched
             "
-            placeholder="admin"
+            placeholder="seu@email.com"
           />
+          @if (loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched) {
+            <p class="mt-1 text-sm text-red-600">Por favor, insira um e-mail válido</p>
+          }
         </div>
 
         <div>

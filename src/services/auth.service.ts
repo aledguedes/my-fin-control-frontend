@@ -66,8 +66,8 @@ export class AuthService {
     return this.token();
   }
 
-  login(user: string, pass: string): Observable<{ token: string } | null> {
-    return this.http.post<{ token: string }>(`${this.apiUrl}/login`, { username: user, password: pass })
+  login(email: string, pass: string): Observable<{ token: string } | null> {
+    return this.http.post<{ token: string }>(`${this.apiUrl}/login`, { email: email, password: pass })
       .pipe(
         // Fix: Explicitly type the response to resolve property access errors.
         tap((response: { token: string }) => {

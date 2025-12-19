@@ -35,7 +35,7 @@ export class LoginComponent implements AfterViewInit {
   private elementRef = inject(ElementRef);
 
   loginForm = new FormGroup({
-    username: new FormControl('', [Validators.required]),
+    email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required]),
   });
 
@@ -98,15 +98,15 @@ export class LoginComponent implements AfterViewInit {
     }
     this.isSubmitting.set(true);
 
-    const { username, password } = this.loginForm.getRawValue();
+    const { email, password } = this.loginForm.getRawValue();
 
-    this.authService.login(username!, password!).subscribe((response) => {
+    this.authService.login(email!, password!).subscribe((response) => {
       this.isSubmitting.set(false);
       if (response) {
         this.notificationService.show('Login realizado com sucesso!', 'success');
         this.router.navigate(['/dashboard']);
       } else {
-        this.notificationService.show('Usuário ou senha inválidos.', 'error');
+        this.notificationService.show('E-mail ou senha inválidos.', 'error');
       }
     });
   }
