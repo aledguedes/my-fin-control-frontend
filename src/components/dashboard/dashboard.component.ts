@@ -98,6 +98,10 @@ export class DashboardComponent {
   }
 
   onEdit(monthlyTx: MonthlyTransaction) {
+    // Aceitar ambos os formatos (camelCase da API e snake_case do modelo)
+    const is_installment = monthlyTx.isInstallment ?? monthlyTx.is_installment ?? false;
+    const is_recurrent = monthlyTx.isRecurrent ?? monthlyTx.is_recurrent ?? false;
+    
     const transaction: Partial<Transaction> = {
       id: monthlyTx.id,
       description: monthlyTx.description,
@@ -105,8 +109,8 @@ export class DashboardComponent {
       type: monthlyTx.type,
       transaction_date: monthlyTx.date,
       category_id: monthlyTx.category_id,
-      is_installment: monthlyTx.is_installment ?? false,
-      is_recurrent: monthlyTx.is_recurrent ?? false,
+      is_installment: is_installment,
+      is_recurrent: is_recurrent,
       payment_method: monthlyTx.payment_method,
       total_installments: monthlyTx.total_installments,
     };

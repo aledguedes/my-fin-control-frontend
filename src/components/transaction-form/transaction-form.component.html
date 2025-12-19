@@ -161,13 +161,14 @@
                     id="is_installment"
                     formControlName="is_installment"
                     type="checkbox"
-                    [disabled]="transactionForm.value.is_recurrent"
+                    [disabled]="isInstallmentDisabled()"
+                    (click)="handleInstallmentClick($event)"
                     class="h-5 w-5 rounded border-2 border-neutral-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                   />
                   <label
                     for="is_installment"
                     class="ml-3 block text-base"
-                    [class.text-neutral-500]="transactionForm.value.is_recurrent"
+                    [class.text-neutral-500]="isInstallmentDisabled()"
                     >Esta despesa é parcelada?</label
                   >
                 </div>
@@ -176,13 +177,14 @@
                     id="is_recurrent"
                     formControlName="is_recurrent"
                     type="checkbox"
-                    [disabled]="transactionForm.value.is_installment"
+                    [disabled]="isRecurrentDisabled()"
+                    (click)="handleRecurrentClick($event)"
                     class="h-5 w-5 rounded border-2 border-neutral-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                   />
                   <label
                     for="is_recurrent"
                     class="ml-3 block text-base"
-                    [class.text-neutral-500]="transactionForm.value.is_installment"
+                    [class.text-neutral-500]="isRecurrentDisabled()"
                     >Esta despesa é recorrente?</label
                   >
                 </div>

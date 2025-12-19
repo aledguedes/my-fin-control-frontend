@@ -1,4 +1,14 @@
-import { Component, ChangeDetectionStrategy, input, output, effect, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  input,
+  output,
+  effect,
+  inject,
+  OnInit,
+  OnDestroy,
+  HostListener,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DataService } from '../../services/data.service';
@@ -19,10 +29,90 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
 
   dataService = inject(DataService);
   private fb = inject(FormBuilder);
-  
+
   transactionForm!: FormGroup;
 
-  payment_methods: payment_method[] = ['Dinheiro', 'Débito', 'Crédito', 'Carnê', 'Boleto', 'Transferência', 'Financiamento', 'Empréstimo'];
+  payment_methods: payment_method[] = [
+    'Dinheiro',
+    'Débito',
+    'Crédito',
+    'Carnê',
+    'Boleto',
+    'Transferência',
+    'Financiamento',
+    'Empréstimo',
+  ];
+
+  // Métodos para controlar desabilitação dos checkboxes
+  private get isEditing(): boolean {
+    return !!this.transactionToEdit()?.id;
+  }
+
+  private get isOriginalInstallment(): boolean {
+    const data = this.transactionToEdit();
+    return (data as any)?.isInstallment === true || data?.is_installment === true;
+  }
+
+  private get isOriginalRecurrent(): boolean {
+    const data = this.transactionToEdit();
+    return (data as any)?.isRecurrent === true || data?.is_recurrent === true;
+  }
+
+  // Checkbox de parcelado deve estar desabilitado se:
+  // 1. É edição E já é parcelada (não pode mudar status)
+  // 2. É recorrente (nunca pode ser parcelada)
+  // 3. Nenhum dos dois está marcado E não é edição (ambos false)
+  isInstallmentDisabled(): boolean {
+    if (!this.transactionForm) return true;
+
+    const isRecurrent = this.transactionForm.get('is_recurrent')?.value ?? false;
+    const isInstallment = this.transactionForm.get('is_installment')?.value ?? false;
+
+    // Se é edição e já era parcelada, desabilitar ambos
+    if (this.isEditing && this.isOriginalInstallment) {
+      return true;
+    }
+
+    // Se é recorrente, sempre desabilitar parcelado
+    if (isRecurrent || this.isOriginalRecurrent) {
+      return true;
+    }
+
+    // Se nenhum dos dois está marcado e não é edição, desabilitar
+    if (!isInstallment && !isRecurrent && !this.isEditing) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Checkbox de recorrente deve estar desabilitado se:
+  // 1. É edição E já é parcelada (não pode mudar status)
+  // 2. É parcelada (não pode ser recorrente)
+  // 3. Nenhum dos dois está marcado E não é edição (ambos false)
+  isRecurrentDisabled(): boolean {
+    if (!this.transactionForm) return true;
+
+    const isInstallment = this.transactionForm.get('is_installment')?.value ?? false;
+    const isRecurrent = this.transactionForm.get('is_recurrent')?.value ?? false;
+
+    // Se é edição e já era parcelada, desabilitar ambos
+    if (this.isEditing && this.isOriginalInstallment) {
+      return true;
+    }
+
+    // Se é parcelada (atual ou original), desabilitar recorrente
+    if (isInstallment || this.isOriginalInstallment) {
+      return true;
+    }
+
+    // Se nenhum dos dois está marcado e não é edição, desabilitar
+    if (!isInstallment && !isRecurrent && !this.isEditing) {
+      return true;
+    }
+
+    return false;
+  }
 
   constructor() {
     effect(() => {
@@ -49,10 +139,26 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
     this.closeModal.emit();
   }
 
+  handleInstallmentClick(event: Event): void {
+    if (this.isInstallmentDisabled()) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
+
+  handleRecurrentClick(event: Event): void {
+    if (this.isRecurrentDisabled()) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }
+
   private buildForm(data: Partial<Transaction> | null = null): void {
-    const is_installment = data?.is_installment ?? false;
-    const is_recurrent = data?.is_recurrent ?? false;
-    
+    // Garantir conversão correta para boolean
+    // Aceitar ambos os formatos (camelCase e snake_case) como medida de segurança
+    const is_installment = (data as any)?.isInstallment === true || data?.is_installment === true;
+    const is_recurrent = (data as any)?.isRecurrent === true || data?.is_recurrent === true;
+
     this.transactionForm = this.fb.group({
       id: [data?.id ?? null],
       type: [data?.type ?? 'expense', Validators.required],
@@ -60,49 +166,90 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
       amount: [data?.amount ?? null, !is_installment ? Validators.required : null],
       category_id: [data?.category_id ?? null, Validators.required],
       payment_method: [data?.payment_method ?? 'Débito', Validators.required],
-      transaction_date: [data?.transaction_date ?? new Date().toISOString().split('T')[0], Validators.required],
+      transaction_date: [
+        data?.transaction_date ?? new Date().toISOString().split('T')[0],
+        Validators.required,
+      ],
       is_installment: [is_installment],
       is_recurrent: [is_recurrent],
-      recurrence_start_date: [data?.recurrence_start_date ?? null], 
+      recurrence_start_date: [data?.recurrence_start_date ?? null],
       installments: this.fb.group({
-        installmentAmount: [is_installment && data?.amount && data.installments?.total_installments ? parseFloat((data.amount / data.installments.total_installments).toFixed(2)) : null, is_installment ? Validators.required : null],
-        total_installments: [data?.installments?.total_installments ?? 2, is_installment ? [Validators.required, Validators.min(2)] : null],
+        installmentAmount: [
+          is_installment && data?.amount && data.installments?.total_installments
+            ? parseFloat((data.amount / data.installments.total_installments).toFixed(2))
+            : null,
+          is_installment ? Validators.required : null,
+        ],
+        total_installments: [
+          data?.installments?.total_installments ?? 2,
+          is_installment ? [Validators.required, Validators.min(2)] : null,
+        ],
         start_date: [data?.installments?.start_date ?? new Date().toISOString().split('T')[0]],
-        paid_installments: [data?.installments?.paid_installments ?? 0]
-      })
+        paid_installments: [data?.installments?.paid_installments ?? 0],
+      }),
     });
     this.setupFormListeners();
     // Initial validation state update
     if (is_recurrent) {
-        this.transactionForm.get('recurrence_start_date')?.setValidators([Validators.required]);
+      this.transactionForm.get('recurrence_start_date')?.setValidators([Validators.required]);
     }
   }
 
   private setupFormListeners(): void {
-    this.transactionForm.get('type')?.valueChanges.subscribe(type => {
+    this.transactionForm.get('type')?.valueChanges.subscribe((type) => {
       this.transactionForm.get('category_id')?.reset();
       if (type === 'revenue') {
-        this.transactionForm.patchValue({ is_installment: false, is_recurrent: false, payment_method: 'Transferência' });
+        this.transactionForm.patchValue({
+          is_installment: false,
+          is_recurrent: false,
+          payment_method: 'Transferência',
+        });
       } else {
         this.transactionForm.patchValue({ payment_method: 'Débito' });
       }
     });
 
-    this.transactionForm.get('is_installment')?.valueChanges.subscribe(is_installment => {
+    this.transactionForm.get('is_installment')?.valueChanges.subscribe((is_installment) => {
+      // Prevenir alterações se o campo estiver desabilitado
+      if (this.isInstallmentDisabled()) {
+        // Restaurar o valor correto baseado no estado
+        let restoreValue = false;
+        if (this.isEditing && this.isOriginalInstallment) {
+          restoreValue = true; // Restaurar para true se era parcelada originalmente
+        } else {
+          restoreValue = false; // Caso contrário, manter false
+        }
+        this.transactionForm.get('is_installment')?.setValue(restoreValue, { emitEvent: false });
+        return;
+      }
+
       if (is_installment) {
         this.transactionForm.get('is_recurrent')?.setValue(false);
       }
       this.updateInstallmentValidators();
     });
 
-    this.transactionForm.get('is_recurrent')?.valueChanges.subscribe(is_recurrent => {
+    this.transactionForm.get('is_recurrent')?.valueChanges.subscribe((is_recurrent) => {
+      // Prevenir alterações se o campo estiver desabilitado
+      if (this.isRecurrentDisabled()) {
+        // Restaurar o valor correto baseado no estado
+        let restoreValue = false;
+        if (this.isEditing && this.isOriginalRecurrent) {
+          restoreValue = true; // Restaurar para true se era recorrente originalmente
+        } else {
+          restoreValue = false; // Caso contrário, manter false
+        }
+        this.transactionForm.get('is_recurrent')?.setValue(restoreValue, { emitEvent: false });
+        return;
+      }
+
       const recurrenceDateControl = this.transactionForm.get('recurrence_start_date');
       if (is_recurrent) {
         this.transactionForm.get('is_installment')?.setValue(false);
         recurrenceDateControl?.setValidators([Validators.required]);
         // Set default date if empty when enabling
         if (!recurrenceDateControl?.value) {
-            recurrenceDateControl?.setValue(new Date().toISOString().split('T')[0]);
+          recurrenceDateControl?.setValue(new Date().toISOString().split('T')[0]);
         }
       } else {
         recurrenceDateControl?.clearValidators();
@@ -111,7 +258,7 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
       recurrenceDateControl?.updateValueAndValidity();
     });
 
-    (this.transactionForm.get('installments') as FormGroup).valueChanges.subscribe(value => {
+    (this.transactionForm.get('installments') as FormGroup).valueChanges.subscribe((value) => {
       if (this.transactionForm.get('is_installment')?.value) {
         const numInstallments = value.total_installments ?? 0;
         const installmentAmt = value.installmentAmount ?? 0;
@@ -131,13 +278,13 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
     const amountControl = this.transactionForm.get('amount');
 
     if (is_installment) {
-        installmentAmountControl?.setValidators([Validators.required, Validators.min(0.01)]);
-        total_installmentsControl?.setValidators([Validators.required, Validators.min(2)]);
-        amountControl?.clearValidators();
+      installmentAmountControl?.setValidators([Validators.required, Validators.min(0.01)]);
+      total_installmentsControl?.setValidators([Validators.required, Validators.min(2)]);
+      amountControl?.clearValidators();
     } else {
-        installmentAmountControl?.clearValidators();
-        total_installmentsControl?.clearValidators();
-        amountControl?.setValidators([Validators.required, Validators.min(0.01)]);
+      installmentAmountControl?.clearValidators();
+      total_installmentsControl?.clearValidators();
+      amountControl?.setValidators([Validators.required, Validators.min(0.01)]);
     }
     installmentAmountControl?.updateValueAndValidity();
     total_installmentsControl?.updateValueAndValidity();
@@ -163,14 +310,16 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
       is_recurrent: formValue.is_recurrent,
       // Map recurrence_start_date to model property (assuming model uses camelCase or I can add the snake_case one)
       recurrence_start_date: formValue.is_recurrent ? formValue.recurrence_start_date : undefined,
-      
-      installments: formValue.is_installment ? {
-        total_installments: formValue.installments.total_installments,
-        paid_installments: formValue.installments.paid_installments,
-        start_date: formValue.installments.start_date
-      } : undefined
+
+      installments: formValue.is_installment
+        ? {
+            total_installments: formValue.installments.total_installments,
+            paid_installments: formValue.installments.paid_installments,
+            start_date: formValue.installments.start_date,
+          }
+        : undefined,
     } as Transaction;
-    
+
     this.saveTransaction.emit(transactionData);
   }
 }

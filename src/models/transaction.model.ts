@@ -66,14 +66,18 @@ export interface InstallmentPlan {
 export interface MonthlyTransaction {
   id: string;
   parentId?: string;
+  parent_id?: string; // API pode retornar snake_case
   description: string;
   amount: number;
   type: 'revenue' | 'expense';
   date: string; // YYYY-MM-DD
   category_id: string;
   is_installment?: boolean;
+  isInstallment?: boolean; // API retorna camelCase
   is_recurrent?: boolean;
+  isRecurrent?: boolean; // API retorna camelCase
   installmentNumber?: number;
+  installment_number?: number; // API pode retornar snake_case
   total_installments?: number;
   payment_method?: payment_method;
 }

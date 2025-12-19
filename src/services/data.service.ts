@@ -54,8 +54,23 @@ export class DataService {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const params = new HttpParams().set('year', String(year)).set('month', String(month));
-    return this.http.get<MonthlyView>(`${this.apiUrl}/summary/monthly-view`, { params }).pipe(
-      tap(view => this.monthlyView.set(view))
+    return this.http.get<any>(`${this.apiUrl}/summary/monthly-view`, { params }).pipe(
+      map((response) => {
+        // Mapear transações da API (camelCase) para o formato esperado (snake_case)
+        const mappedTransactions = (response.transactions || []).map((tx: any) => ({
+          ...tx,
+          is_installment: tx.isInstallment ?? tx.is_installment ?? false,
+          is_recurrent: tx.isRecurrent ?? tx.is_recurrent ?? false,
+          installment_number: tx.installment_number ?? tx.installmentNumber,
+          parent_id: tx.parent_id ?? tx.parentId,
+        }));
+        
+        return {
+          ...response,
+          transactions: mappedTransactions,
+        } as MonthlyView;
+      }),
+      tap((view) => this.monthlyView.set(view))
     );
   }
   

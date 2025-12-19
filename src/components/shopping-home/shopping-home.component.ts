@@ -45,7 +45,9 @@ export class ShoppingHomeComponent implements OnInit {
   view = signal<'dashboard' | 'categories' | 'products'>('dashboard');
   isCreateListModalOpen = signal(false);
   isDeleteConfirmModalOpen = signal(false);
+  isDeleteProductModalOpen = signal(false);
   listToDelete = signal<string | null>(null);
+  productToDelete = signal<string | null>(null);
   editingcategory_id = signal<string | null>(null);
   editingProductId = signal<string | null>(null);
   expandedcategory_ids = signal<string[]>([]);
@@ -90,6 +92,13 @@ export class ShoppingHomeComponent implements OnInit {
     if (!listId) return '';
     const list = this.shoppingService.shoppingLists().find((l) => l.id === listId);
     return list?.name || '';
+  });
+
+  productToDeleteName = computed(() => {
+    const productId = this.productToDelete();
+    if (!productId) return '';
+    const product = this.shoppingService.products().find((p) => p.id === productId);
+    return product?.name || '';
   });
 
   ngOnInit(): void {
@@ -274,13 +283,26 @@ export class ShoppingHomeComponent implements OnInit {
   }
 
   deleteProduct(id: string): void {
-    if (confirm('Tem certeza que deseja excluir este produto?')) {
-      this.loadingAction.set(`delete-product-${id}`);
-      this.shoppingService
-        .deleteProduct(id)
-        .pipe(finalize(() => this.loadingAction.set(null)))
-        .subscribe();
-    }
+    this.productToDelete.set(id);
+    this.isDeleteProductModalOpen.set(true);
+  }
+
+  confirmDeleteProduct(): void {
+    const productId = this.productToDelete();
+    if (!productId) return;
+
+    this.loadingAction.set(`delete-product-${productId}`);
+    this.shoppingService
+      .deleteProduct(productId)
+      .pipe(finalize(() => this.loadingAction.set(null)))
+      .subscribe(() => {
+        this.closeDeleteProductModal();
+      });
+  }
+
+  closeDeleteProductModal(): void {
+    this.isDeleteProductModalOpen.set(false);
+    this.productToDelete.set(null);
   }
 
   startEditProduct(product: Product): void {

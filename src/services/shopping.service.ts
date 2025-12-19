@@ -341,9 +341,33 @@ export class ShoppingService {
           console.warn('Status 201 recebido - produto criado mas resposta pode estar malformada');
           // Tentar recarregar os produtos para sincronizar
           this.loadInitialData().subscribe();
+          this.notificationService.show('Produto adicionado! Recarregando lista...', 'success');
+          return throwError(() => err);
         }
 
-        this.notificationService.show('Erro ao adicionar produto.', 'error');
+        // Extrair mensagem de erro do backend
+        let errorMessage = 'Erro ao adicionar produto.';
+
+        if (err.error) {
+          // Priorizar mensagem do backend
+          if (typeof err.error === 'string') {
+            errorMessage = err.error;
+          } else if (err.error.message) {
+            errorMessage = err.error.message;
+          } else if (err.error.error) {
+            errorMessage = err.error.error;
+          } else if (err.error.detail) {
+            errorMessage = err.error.detail;
+          }
+        } else if (err.status === 500) {
+          // Mensagem genérica para erro 500
+          errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
+        } else if (!err.status || err.status === 0) {
+          // Sem resposta do servidor
+          errorMessage = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
+        }
+
+        this.notificationService.show(errorMessage, 'error');
         return throwError(() => err);
       }),
     );
