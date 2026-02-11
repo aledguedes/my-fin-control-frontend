@@ -37,7 +37,7 @@ export class FinancialHomeComponent {
   // Available years (2025-2035)
   availableYears = computed(() => {
     const years: number[] = [];
-    const startYear = 2025;
+    const startYear = 2026;
     const endYear = startYear + 10;
     for (let i = startYear; i <= endYear; i++) {
       years.push(i);
@@ -66,9 +66,26 @@ export class FinancialHomeComponent {
     this.uiService.openTransactionModal(null);
   }
 
+  isPreviousMonthAllowed = computed(() => {
+    const year = this.currentYear();
+    const month = this.currentMonth();
+    return year > 2026 || (year === 2026 && month > 0);
+  });
+
   navigateMonth(direction: number): void {
+    // Safety check: prevent navigating before January 2026
+    if (direction < 0 && !this.isPreviousMonthAllowed()) {
+      return;
+    }
+
     const current = this.currentDate();
     const newDate = new Date(current.getFullYear(), current.getMonth() + direction, 2);
+
+    // Double check to ensure we don't go below Jan 2026
+    if (newDate.getFullYear() < 2026) {
+      return;
+    }
+
     this.currentDate.set(newDate);
     this.cdr.markForCheck();
   }
