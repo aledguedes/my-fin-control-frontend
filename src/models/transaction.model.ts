@@ -42,6 +42,7 @@ export interface Transaction {
   total_installments?: number;
   start_date?: string;
   paid_installments?: number;
+  status?: 'PAID' | 'UPCOMING' | 'OVERDUE';
 }
 
 // This is a derived model, not stored directly. Represents one installment payment.
@@ -51,7 +52,7 @@ export interface InstallmentEntry {
   total_installments: number;
   dueDate: Date;
   amount: number;
-  status: 'paid' | 'pending';
+  status: 'PAID' | 'UPCOMING' | 'OVERDUE';
   description: string;
   category: FinancialCategory;
   payment_method: payment_method;
@@ -64,10 +65,12 @@ export interface InstallmentPlan {
   totalAmount: number;
   installmentAmount: number;
   totalInstallments: number;
+  total_installments?: number; // compatibilidade
   paidInstallments: number;
+  paid_installments?: number; // compatibilidade
   remainingInstallments: number;
   startDate: string; // YYYY-MM-DD
-  status: 'ativo' | 'atrasado' | 'concluído';
+  status: 'PAID' | 'OVERDUE' | 'UPCOMING';
   type: 'revenue' | 'expense';
   category_id: string;
 }
@@ -89,6 +92,9 @@ export interface MonthlyTransaction {
   installment_number?: number; // API pode retornar snake_case
   total_installments?: number;
   payment_method?: payment_method;
+  status?: 'PAID' | 'UPCOMING' | 'OVERDUE';
+  paid_installments?: number;
+  paidInstallments?: number;
 }
 
 export interface MonthlyView {

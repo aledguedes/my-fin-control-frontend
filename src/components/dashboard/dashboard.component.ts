@@ -68,7 +68,7 @@ export class DashboardComponent {
 
     const selectedIds = this.uiService.selectedTransactions();
     const selectedTransactions = view.transactions.filter(
-      (t) => t.type === 'expense' && selectedIds.has(t.id)
+      (t) => t.type === 'expense' && selectedIds.has(t.id),
     );
 
     return selectedTransactions.reduce((sum, t) => sum + t.amount, 0);
@@ -145,7 +145,7 @@ export class DashboardComponent {
     // Aceitar ambos os formatos (camelCase da API e snake_case do modelo)
     const is_installment = monthlyTx.isInstallment ?? monthlyTx.is_installment ?? false;
     const is_recurrent = monthlyTx.isRecurrent ?? monthlyTx.is_recurrent ?? false;
-    
+
     const transaction: Partial<Transaction> = {
       id: monthlyTx.id,
       description: monthlyTx.description,
@@ -162,21 +162,69 @@ export class DashboardComponent {
   }
 
   onDelete(transaction: MonthlyTransaction) {
-    if (
-      confirm(
-        'Tem certeza que deseja excluir este lançamento? Se for um parcelamento, a transação original e todas as parcelas futuras serão removidas.',
-      )
-    ) {
-      this.deletingId.set(transaction.id);
-      this.dataService
-        .deleteTransaction(transaction.id)
-        .pipe(finalize(() => this.deletingId.set(null)))
-        .subscribe({
-          next: () => {
-            this.dataService.fetchMonthlyView(this.currentDate()).subscribe();
-            this.dataService.refreshInstallmentPlans().subscribe();
-          },
-        });
+    this.uiService.openConfirmModal(
+      'Excluir Lançamento',
+      'Tem certeza que deseja excluir este lançamento? Se for um parcelamento, a transação original e todas as parcelas futuras serão removidas.',
+      () => {
+        this.deletingId.set(transaction.id);
+        this.dataService
+          .deleteTransaction(transaction.id)
+          .pipe(finalize(() => this.deletingId.set(null)))
+          .subscribe({
+            next: () => {
+              this.dataService.fetchMonthlyView(this.currentDate()).subscribe();
+              this.dataService.refreshInstallmentPlans().subscribe();
+            },
+          });
+      },
+      { type: 'danger', confirmText: 'Confirmar Exclusão' },
+    );
+  }
+
+  onTogglePayment(transaction: MonthlyTransaction) {
+    const parentId = transaction.parent_id || transaction.parentId || transaction.id;
+    const currentPaid = transaction.paid_installments ?? 0;
+    const clickedInstallment = transaction.installment_number ?? 1;
+
+    // Se já está pago, o clique no botão de "check" pode significar estorno (voltar para a anterior)
+    if (transaction.status === 'PAID') {
+      this.uiService.openConfirmModal(
+        'Estornar Pagamento',
+        'Deseja estornar o pagamento deste mês? O contador de parcelas pagas será reduzido.',
+        () => {
+          this.dataService.updatePayment(parentId, clickedInstallment - 1).subscribe({
+            next: () => this.dataService.fetchMonthlyView(this.currentDate()).subscribe(),
+          });
+        },
+        { type: 'warning', confirmText: 'Sim, Estornar' },
+      );
+      return;
+    }
+
+    const processPayment = () => {
+      this.dataService.updatePayment(parentId, clickedInstallment).subscribe({
+        next: () => {
+          this.dataService.fetchMonthlyView(this.currentDate()).subscribe();
+        },
+      });
+    };
+
+    // Lógica do Alerta de Salto
+    if (clickedInstallment > currentPaid + 1) {
+      this.uiService.openConfirmModal(
+        'Atenção: Salto de Parcelas',
+        'Existem meses anteriores em atraso ou pendentes para esta conta. Ao confirmar o pagamento deste mês, todos os meses anteriores também serão marcados como pagos. Deseja continuar?',
+        processPayment,
+        { type: 'danger', confirmText: 'Confirmar Pagamento' },
+      );
+    } else {
+      // Confirmação simples para pagamento comum
+      this.uiService.openConfirmModal(
+        'Confirmar Pagamento',
+        `Deseja marcar o pagamento da parcela ${clickedInstallment} como concluído?`,
+        processPayment,
+        { type: 'info', confirmText: 'Marcar como Pago' },
+      );
     }
   }
 }

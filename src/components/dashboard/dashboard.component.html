@@ -270,84 +270,202 @@
         <ul class="divide-y divide-gray-200">
           @for (transaction of displayedTransactions(); track trackById($index, transaction)) {
             <li
-              class="p-4 transition-colors"
-              [class.hover:bg-gray-50]="!uiService.isGroupingMode() || transaction.type !== 'expense'"
-              [class.bg-purple-50]="uiService.isGroupingMode() && transaction.type === 'expense' && uiService.isTransactionSelected(transaction.id)"
-              [class.cursor-pointer]="uiService.isGroupingMode() && transaction.type === 'expense'"
-              [class.cursor-default]="!(uiService.isGroupingMode() && transaction.type === 'expense')"
+              class="relative p-4 transition-all duration-300 border-l-4 group"
+              [class.border-emerald-500]="transaction.status === 'PAID'"
+              [class.bg-emerald-50/30]="transaction.status === 'PAID'"
+              [class.border-rose-500]="transaction.status === 'OVERDUE'"
+              [class.border-amber-500]="transaction.status === 'UPCOMING' || !transaction.status"
+              [class.hover:bg-gray-50]="
+                (!uiService.isGroupingMode() || transaction.type !== 'expense') &&
+                transaction.status !== 'PAID'
+              "
+              [class.bg-purple-50]="
+                uiService.isGroupingMode() &&
+                transaction.type === 'expense' &&
+                uiService.isTransactionSelected(transaction.id)
+              "
             >
-              <button
-                (click)="handleTransactionClick(transaction)"
-                [disabled]="uiService.isGroupingMode() && transaction.type !== 'expense'"
-                class="w-full flex items-center gap-4 text-left disabled:cursor-not-allowed"
-              >
-                <div class="flex items-center gap-3 flex-shrink-0">
-                  @if (uiService.isGroupingMode() && transaction.type === 'expense') {
-                    <input
-                      type="checkbox"
-                      [checked]="uiService.isTransactionSelected(transaction.id)"
-                      (click)="$event.stopPropagation()"
-                      (change)="uiService.toggleTransactionSelection(transaction.id)"
-                      class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+              <!-- PAID Watermark Icon -->
+              @if (transaction.status === 'PAID') {
+                <div
+                  class="absolute right-16 top-1/2 -translate-y-1/2 pointer-events-none opacity-[0.05] scale-[2.5] text-emerald-600"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-12 w-12"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
                     />
-                  }
-                  <div
-                    class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                    [class.bg-emerald-100]="transaction.type === 'revenue'"
-                    [class.text-emerald-600]="transaction.type === 'revenue'"
-                    [class.bg-rose-100]="transaction.type === 'expense'"
-                    [class.text-rose-600]="transaction.type === 'expense'"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-6 w-6"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path [attr.d]="getCategoryIcon(transaction.category_id)" />
-                    </svg>
-                  </div>
+                  </svg>
                 </div>
-                <div class="flex-1 min-w-0">
-                  <p class="font-semibold text-gray-800 truncate">
-                    {{ transaction.description }}
-                    @if (
-                      transaction.is_installment &&
-                      transaction.installmentNumber &&
-                      transaction.total_installments
-                    ) {
-                      <span class="text-sm text-gray-600"
-                        >(Parcela {{ transaction.installmentNumber }}/{{
-                          transaction.total_installments
-                        }})</span
+              }
+
+              <div class="flex items-center gap-4 relative z-10">
+                <button
+                  (click)="handleTransactionClick(transaction)"
+                  [disabled]="uiService.isGroupingMode() && transaction.type !== 'expense'"
+                  class="flex-1 flex items-center gap-4 text-left disabled:cursor-not-allowed"
+                >
+                  <div class="flex items-center gap-3 flex-shrink-0">
+                    @if (uiService.isGroupingMode() && transaction.type === 'expense') {
+                      <input
+                        type="checkbox"
+                        [checked]="uiService.isTransactionSelected(transaction.id)"
+                        (click)="$event.stopPropagation()"
+                        (change)="uiService.toggleTransactionSelection(transaction.id)"
+                        class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                      />
+                    }
+                    <div
+                      class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm transition-all duration-300 group-hover:scale-110"
+                      [class.bg-emerald-100]="
+                        transaction.type === 'revenue' && transaction.status !== 'PAID'
+                      "
+                      [class.text-emerald-600]="
+                        transaction.type === 'revenue' && transaction.status !== 'PAID'
+                      "
+                      [class.bg-gray-100]="transaction.status === 'PAID'"
+                      [class.text-gray-400]="transaction.status === 'PAID'"
+                      [class.bg-rose-100]="
+                        transaction.type === 'expense' && transaction.status !== 'PAID'
+                      "
+                      [class.text-rose-600]="
+                        transaction.type === 'expense' && transaction.status !== 'PAID'
+                      "
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
                       >
-                    }
-                  </p>
-                  <div class="flex items-center gap-2 mt-1 text-sm text-gray-600">
-                    <span
-                      class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700"
-                    >
-                      {{ getCategoryName(transaction.category_id) }}
-                    </span>
-                    <span>•</span>
-                    <span>{{ transaction.date | date: 'dd/MM/yyyy' : '' : 'pt' }}</span>
-                    @if (transaction.payment_method) {
-                      <span>•</span>
-                      <span>{{ transaction.payment_method }}</span>
-                    }
+                        <path [attr.d]="getCategoryIcon(transaction.category_id)" />
+                      </svg>
+                    </div>
                   </div>
-                </div>
-                <div class="text-right flex-shrink-0">
-                  <p
-                    class="text-lg font-bold"
-                    [class.text-emerald-600]="transaction.type === 'revenue'"
-                    [class.text-red-600]="transaction.type === 'expense'"
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <p
+                        class="font-bold truncate transition-colors duration-300"
+                        [class.text-gray-900]="transaction.status !== 'PAID'"
+                        [class.text-gray-400]="transaction.status === 'PAID'"
+                        [class.line-through]="transaction.status === 'PAID'"
+                      >
+                        {{ transaction.description }}
+                      </p>
+                      @if (transaction.status === 'PAID') {
+                        <span
+                          class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-black bg-emerald-500 text-white shadow-sm shadow-emerald-200"
+                        >
+                          Pago
+                        </span>
+                      } @else if (transaction.status === 'OVERDUE') {
+                        <span
+                          class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200"
+                        >
+                          Atrasado
+                        </span>
+                      } @else {
+                        <span
+                          class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200"
+                        >
+                          A vencer
+                        </span>
+                      }
+                    </div>
+                    <div class="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                      <span
+                        class="font-medium transition-colors"
+                        [class.text-indigo-600]="transaction.status !== 'PAID'"
+                        [class.text-gray-400]="transaction.status === 'PAID'"
+                      >
+                        {{ getCategoryName(transaction.category_id) }}
+                      </span>
+                      <span>•</span>
+                      <span [class.text-gray-400]="transaction.status === 'PAID'">
+                        {{ transaction.date | date: 'dd/MM/yyyy' : '' : 'pt' }}
+                      </span>
+                      @if (transaction.is_installment || transaction.isInstallment) {
+                        <span>•</span>
+                        <span
+                          class="font-medium transition-colors"
+                          [class.text-orange-600]="transaction.status !== 'PAID'"
+                          [class.text-gray-400]="transaction.status === 'PAID'"
+                        >
+                          Parcela
+                          {{ transaction.installment_number ?? transaction.installmentNumber }}/{{
+                            transaction.total_installments
+                          }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  <div class="text-right flex-shrink-0">
+                    <p
+                      class="text-lg font-black transition-all duration-300"
+                      [class.text-emerald-600]="
+                        transaction.type === 'revenue' && transaction.status !== 'PAID'
+                      "
+                      [class.text-rose-600]="
+                        transaction.type === 'expense' && transaction.status !== 'PAID'
+                      "
+                      [class.text-gray-300]="transaction.status === 'PAID'"
+                      [class.scale-90]="transaction.status === 'PAID'"
+                    >
+                      {{ transaction.type === 'revenue' ? '+' : '-' }} R$
+                      {{ transaction.amount | number: '1.2-2' : 'pt' }}
+                    </p>
+                    <p class="text-xs text-gray-400 mt-0.5 capitalize">
+                      {{ transaction.payment_method }}
+                    </p>
+                  </div>
+                </button>
+
+                <div class="flex items-center gap-2 ml-2">
+                  <button
+                    (click)="onTogglePayment(transaction)"
+                    class="p-2 rounded-xl transition-all duration-200 hover:bg-gray-100 group/btn"
+                    [title]="
+                      transaction.status === 'PAID' ? 'Estornar Pagamento' : 'Marcar como Pago'
+                    "
                   >
-                    {{ transaction.type === 'revenue' ? '+' : '-' }} R$
-                    {{ transaction.amount | number: '1.2-2' : 'pt' }}
-                  </p>
+                    @if (transaction.status === 'PAID') {
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6 text-emerald-500 group-hover/btn:scale-110"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    } @else {
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6 text-gray-300 hover:text-emerald-400 group-hover/btn:scale-110"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    }
+                  </button>
                 </div>
-              </button>
+              </div>
             </li>
           }
         </ul>

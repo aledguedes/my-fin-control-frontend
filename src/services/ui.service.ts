@@ -5,7 +5,7 @@ import { Transaction } from '../models/transaction.model';
 export class UiService {
   isTransactionModalOpen = signal(false);
   editingTransaction = signal<Partial<Transaction> | null>(null);
-  
+
   // Estado de agrupamento
   isGroupingMode = signal(false);
   selectedTransactions = signal<Set<string>>(new Set());
@@ -45,5 +45,40 @@ export class UiService {
 
   isTransactionSelected(transactionId: string): boolean {
     return this.selectedTransactions().has(transactionId);
+  }
+
+  // Modal de Confirmação Genérico
+  confirmModal = signal<{
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    type?: 'danger' | 'warning' | 'info';
+    onConfirm: () => void;
+  } | null>(null);
+
+  openConfirmModal(
+    title: string,
+    message: string,
+    onConfirm: () => void,
+    options: {
+      confirmText?: string;
+      cancelText?: string;
+      type?: 'danger' | 'warning' | 'info';
+    } = {},
+  ): void {
+    this.confirmModal.set({
+      title,
+      message,
+      onConfirm: () => {
+        onConfirm();
+        this.closeConfirmModal();
+      },
+      ...options,
+    });
+  }
+
+  closeConfirmModal(): void {
+    this.confirmModal.set(null);
   }
 }

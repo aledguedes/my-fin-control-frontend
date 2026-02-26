@@ -65,14 +65,27 @@ export class DataService {
     const params = new HttpParams().set('year', String(year)).set('month', String(month));
     return this.http.get<any>(`${this.apiUrl}/summary/monthly-view`, { params }).pipe(
       map((response) => {
+        const today = new Date().toISOString().split('T')[0];
         // Mapear transações da API (camelCase) para o formato esperado (snake_case)
-        const mappedTransactions = (response.transactions || []).map((tx: any) => ({
-          ...tx,
-          is_installment: tx.isInstallment ?? tx.is_installment ?? false,
-          is_recurrent: tx.isRecurrent ?? tx.is_recurrent ?? false,
-          installment_number: tx.installment_number ?? tx.installmentNumber,
-          parent_id: tx.parent_id ?? tx.parentId,
-        }));
+        const mappedTransactions = (response.transactions || []).map((tx: any) => {
+          const date = tx.date || tx.transaction_date;
+          let status = tx.status;
+
+          // Fallback logic aligned with new enums if status is missing
+          if (!status) {
+            status = date < today ? 'OVERDUE' : 'UPCOMING';
+          }
+
+          return {
+            ...tx,
+            status,
+            is_installment: tx.isInstallment ?? tx.is_installment ?? false,
+            is_recurrent: tx.isRecurrent ?? tx.is_recurrent ?? false,
+            installment_number: tx.installment_number ?? tx.installmentNumber,
+            parent_id: tx.parent_id ?? tx.parentId,
+            paid_installments: tx.paid_installments ?? tx.paidInstallments ?? 0,
+          };
+        });
 
         return {
           ...response,
@@ -111,6 +124,51 @@ export class DataService {
         }),
         catchError((err) => {
           this.notificationService.show('Erro ao atualizar lançamento.', 'error');
+          return throwError(() => err);
+        }),
+      );
+  }
+
+  updateTransactionStatus(
+    id: string,
+    status: 'PAID' | 'UPCOMING' | 'OVERDUE',
+  ): Observable<Transaction> {
+    return this.http
+      .patch<Transaction>(`${this.apiUrl}/transactions/${id}/status`, { status })
+      .pipe(
+        tap(() => {
+          this.cacheService.clearByPattern('/summary/monthly-view');
+          this.cacheService.clearByPattern('/summary/installment-plans');
+          const statusLabels: Record<string, string> = {
+            PAID: 'Pago',
+            UPCOMING: 'Pendente',
+            OVERDUE: 'Atrasado',
+          };
+          this.notificationService.show(
+            `Status atualizado para ${statusLabels[status]}!`,
+            'success',
+          );
+        }),
+        catchError((err) => {
+          this.notificationService.show('Erro ao atualizar status.', 'error');
+          return throwError(() => err);
+        }),
+      );
+  }
+
+  updatePayment(parentId: string, paidInstallments: number): Observable<any> {
+    return this.http
+      .patch(`${this.apiUrl}/transactions/${parentId}/payment`, {
+        paid_installments: paidInstallments,
+      })
+      .pipe(
+        tap(() => {
+          this.cacheService.clearByPattern('/summary/monthly-view');
+          this.cacheService.clearByPattern('/summary/installment-plans');
+          this.notificationService.show('Pagamento atualizado!', 'success');
+        }),
+        catchError((err) => {
+          this.notificationService.show('Erro ao atualizar pagamento.', 'error');
           return throwError(() => err);
         }),
       );
