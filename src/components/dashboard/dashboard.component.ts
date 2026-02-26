@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { Transaction, MonthlyTransaction } from '../../models/transaction.model';
 import { UiService } from '../../services/ui.service';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -54,6 +54,11 @@ export class DashboardComponent {
       transactions = transactions.filter((t) => t.type === 'expense');
     }
 
+    // Se o modo de exclusão estiver ativo, mostrar apenas recorrentes
+    if (this.uiService.isExclusionMode()) {
+      transactions = transactions.filter((t) => t.is_recurrent || t.isRecurrent);
+    }
+
     return this.showAllTransactions() ? transactions : transactions.slice(0, 5);
   });
 
@@ -74,15 +79,25 @@ export class DashboardComponent {
     return selectedTransactions.reduce((sum, t) => sum + t.amount, 0);
   });
 
+  // Quantidade de transações recorrentes selecionadas para exclusão
+  exclusionCount = computed(() => {
+    if (!this.uiService.isExclusionMode()) {
+      return 0;
+    }
+    return this.uiService.selectedTransactions().size;
+  });
+
   constructor() {
-    // Fetch monthly view when date changes
+    // Fetch monthly view when date or showHidden changes
     effect(
       () => {
         this.isLoading.set(true);
-        const subscription = this.dataService.fetchMonthlyView(this.currentDate()).subscribe({
-          next: () => this.isLoading.set(false),
-          error: () => this.isLoading.set(false),
-        });
+        const subscription = this.dataService
+          .fetchMonthlyView(this.currentDate(), this.uiService.showHiddenItems())
+          .subscribe({
+            next: () => this.isLoading.set(false),
+            error: () => this.isLoading.set(false),
+          });
         // Cleanup subscription on effect disposal
         return () => subscription.unsubscribe();
       },
@@ -123,6 +138,29 @@ export class DashboardComponent {
 
   toggleGroupingMode(): void {
     this.uiService.toggleGroupingMode();
+  }
+
+  toggleShowHiddenItems(): void {
+    this.uiService.toggleShowHiddenItems();
+  }
+
+  onRestoreTransaction(transaction: MonthlyTransaction): void {
+    const monthStr = `${transaction.date.split('-')[0]}-${transaction.date.split('-')[1]}`;
+
+    this.uiService.openConfirmModal(
+      'Restaurar Lançamento',
+      `Deseja restaurar "${transaction.description}" para o mês ${monthStr}?`,
+      () => {
+        this.dataService.excludeRecurrentMonth(transaction.id, monthStr, 'remove').subscribe({
+          next: () => {
+            this.dataService
+              .fetchMonthlyView(this.currentDate(), this.uiService.showHiddenItems())
+              .subscribe();
+          },
+        });
+      },
+      { type: 'info', confirmText: 'Restaurar' },
+    );
   }
 
   handleTransactionClick(transaction: MonthlyTransaction): void {
@@ -179,6 +217,21 @@ export class DashboardComponent {
       },
       { type: 'danger', confirmText: 'Confirmar Exclusão' },
     );
+  }
+
+  toggleExclusionMode(): void {
+    this.uiService.toggleExclusionMode();
+  }
+
+  confirmExclusion(): void {
+    const selectedIds = Array.from(this.uiService.selectedTransactions());
+
+    if (selectedIds.length === 0) {
+      this.dataService['notificationService'].show('Selecione pelo menos uma conta.', 'error');
+      return;
+    }
+
+    this.uiService.openExclusionModal();
   }
 
   onTogglePayment(transaction: MonthlyTransaction) {

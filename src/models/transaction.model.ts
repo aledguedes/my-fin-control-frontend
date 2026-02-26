@@ -95,6 +95,7 @@ export interface MonthlyTransaction {
   status?: 'PAID' | 'UPCOMING' | 'OVERDUE';
   paid_installments?: number;
   paidInstallments?: number;
+  isHidden?: boolean;
 }
 
 export interface MonthlyView {

@@ -4,6 +4,7 @@ import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { TransactionFormComponent } from '../transaction-form/transaction-form.component';
 import { HeaderComponent } from '../header/header.component';
 import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
+import { ExclusionModalComponent } from '../exclusion-modal/exclusion-modal.component';
 import { DataService } from '../../services/data.service';
 import { Transaction } from '../../models/transaction.model';
 import { UiService } from '../../services/ui.service';
@@ -18,6 +19,7 @@ import { finalize } from 'rxjs';
     TransactionFormComponent,
     HeaderComponent,
     ConfirmModalComponent,
+    ExclusionModalComponent,
   ],
   templateUrl: './main-layout.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

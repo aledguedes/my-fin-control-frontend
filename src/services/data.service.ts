@@ -59,33 +59,41 @@ export class DataService {
       );
   }
 
-  fetchMonthlyView(date: Date): Observable<MonthlyView> {
+  fetchMonthlyView(date: Date, showHidden: boolean = false): Observable<MonthlyView> {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
-    const params = new HttpParams().set('year', String(year)).set('month', String(month));
+    let params = new HttpParams().set('year', String(year)).set('month', String(month));
+
+    if (showHidden) {
+      params = params.set('showHidden', 'true');
+    }
+
     return this.http.get<any>(`${this.apiUrl}/summary/monthly-view`, { params }).pipe(
       map((response) => {
         const today = new Date().toISOString().split('T')[0];
         // Mapear transações da API (camelCase) para o formato esperado (snake_case)
-        const mappedTransactions = (response.transactions || []).map((tx: any) => {
-          const date = tx.date || tx.transaction_date;
-          let status = tx.status;
+        const mappedTransactions = (response.transactions || response.monthlyView || []).map(
+          (tx: any) => {
+            const date = tx.date || tx.transaction_date;
+            let status = tx.status;
 
-          // Fallback logic aligned with new enums if status is missing
-          if (!status) {
-            status = date < today ? 'OVERDUE' : 'UPCOMING';
-          }
+            // Fallback logic aligned with new enums if status is missing
+            if (!status) {
+              status = date < today ? 'OVERDUE' : 'UPCOMING';
+            }
 
-          return {
-            ...tx,
-            status,
-            is_installment: tx.isInstallment ?? tx.is_installment ?? false,
-            is_recurrent: tx.isRecurrent ?? tx.is_recurrent ?? false,
-            installment_number: tx.installment_number ?? tx.installmentNumber,
-            parent_id: tx.parent_id ?? tx.parentId,
-            paid_installments: tx.paid_installments ?? tx.paidInstallments ?? 0,
-          };
-        });
+            return {
+              ...tx,
+              status,
+              isHidden: tx.isHidden ?? false,
+              is_installment: tx.isInstallment ?? tx.is_installment ?? false,
+              is_recurrent: tx.isRecurrent ?? tx.is_recurrent ?? false,
+              installment_number: tx.installment_number ?? tx.installmentNumber,
+              parent_id: tx.parent_id ?? tx.parentId,
+              paid_installments: tx.paid_installments ?? tx.paidInstallments ?? 0,
+            };
+          },
+        );
 
         return {
           ...response,
@@ -208,6 +216,43 @@ export class DataService {
 
   getCategoryById(id: string): FinancialCategory | undefined {
     return this.categories().find((c) => c.id === id);
+  }
+
+  excludeRecurrentMonth(
+    id: string,
+    month: string | string[],
+    action: 'add' | 'remove',
+  ): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/transactions/${id}/exclude`, { month, action }).pipe(
+      tap(() => {
+        this.cacheService.clearByPattern('/summary/monthly-view');
+        this.cacheService.clearByPattern('/summary/installment-plans');
+        this.notificationService.show(
+          action === 'add' ? 'Alteração aplicada com sucesso!' : 'Mês restaurado!',
+          'success',
+        );
+      }),
+      catchError((err) => {
+        this.notificationService.show('Erro ao processar exclusão.', 'error');
+        return throwError(() => err);
+      }),
+    );
+  }
+
+  excludeRecurrentBatch(
+    items: { id: string; month: string | string[]; action: 'add' | 'remove' }[],
+  ): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/transactions/batch/exclude`, items).pipe(
+      tap(() => {
+        this.cacheService.clearByPattern('/summary/monthly-view');
+        this.cacheService.clearByPattern('/summary/installment-plans');
+        this.notificationService.show('Alteração em lote aplicada!', 'success');
+      }),
+      catchError((err) => {
+        this.notificationService.show('Erro ao processar lote.', 'error');
+        return throwError(() => err);
+      }),
+    );
   }
 
   triggerInstallmentsNavigation() {
