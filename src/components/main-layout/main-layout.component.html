@@ -1,16 +1,20 @@
 <div class="min-h-screen bg-neutral-100 text-neutral-800">
-    <app-header></app-header>
+  <app-header></app-header>
 
   <main class="container mx-auto p-4 sm:p-6 lg:p-8">
     <router-outlet></router-outlet>
   </main>
 
   @if (uiService.isTransactionModalOpen()) {
-    <app-transaction-form 
+    <app-transaction-form
       [transactionToEdit]="uiService.editingTransaction()"
       [isSaving]="isSaving()"
       (closeModal)="uiService.closeTransactionModal()"
-      (saveTransaction)="handleSaveTransaction($event)">
+      (saveTransaction)="handleSaveTransaction($event)"
+    >
     </app-transaction-form>
   }
+
+  <app-confirm-modal></app-confirm-modal>
+  <app-exclusion-modal></app-exclusion-modal>
 </div>

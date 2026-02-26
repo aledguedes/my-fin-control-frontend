@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { DataService } from '../../services/data.service';
 import { Transaction, MonthlyTransaction } from '../../models/transaction.model';
 import { UiService } from '../../services/ui.service';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -54,6 +54,11 @@ export class DashboardComponent {
       transactions = transactions.filter((t) => t.type === 'expense');
     }
 
+    // Se o modo de exclusão estiver ativo, mostrar apenas recorrentes
+    if (this.uiService.isExclusionMode()) {
+      transactions = transactions.filter((t) => t.is_recurrent || t.isRecurrent);
+    }
+
     return this.showAllTransactions() ? transactions : transactions.slice(0, 5);
   });
 
@@ -68,21 +73,31 @@ export class DashboardComponent {
 
     const selectedIds = this.uiService.selectedTransactions();
     const selectedTransactions = view.transactions.filter(
-      (t) => t.type === 'expense' && selectedIds.has(t.id)
+      (t) => t.type === 'expense' && selectedIds.has(t.id),
     );
 
     return selectedTransactions.reduce((sum, t) => sum + t.amount, 0);
   });
 
+  // Quantidade de transações recorrentes selecionadas para exclusão
+  exclusionCount = computed(() => {
+    if (!this.uiService.isExclusionMode()) {
+      return 0;
+    }
+    return this.uiService.selectedTransactions().size;
+  });
+
   constructor() {
-    // Fetch monthly view when date changes
+    // Fetch monthly view when date or showHidden changes
     effect(
       () => {
         this.isLoading.set(true);
-        const subscription = this.dataService.fetchMonthlyView(this.currentDate()).subscribe({
-          next: () => this.isLoading.set(false),
-          error: () => this.isLoading.set(false),
-        });
+        const subscription = this.dataService
+          .fetchMonthlyView(this.currentDate(), this.uiService.showHiddenItems())
+          .subscribe({
+            next: () => this.isLoading.set(false),
+            error: () => this.isLoading.set(false),
+          });
         // Cleanup subscription on effect disposal
         return () => subscription.unsubscribe();
       },
@@ -125,6 +140,29 @@ export class DashboardComponent {
     this.uiService.toggleGroupingMode();
   }
 
+  toggleShowHiddenItems(): void {
+    this.uiService.toggleShowHiddenItems();
+  }
+
+  onRestoreTransaction(transaction: MonthlyTransaction): void {
+    const monthStr = `${transaction.date.split('-')[0]}-${transaction.date.split('-')[1]}`;
+
+    this.uiService.openConfirmModal(
+      'Restaurar Lançamento',
+      `Deseja restaurar "${transaction.description}" para o mês ${monthStr}?`,
+      () => {
+        this.dataService.excludeRecurrentMonth(transaction.id, monthStr, 'remove').subscribe({
+          next: () => {
+            this.dataService
+              .fetchMonthlyView(this.currentDate(), this.uiService.showHiddenItems())
+              .subscribe();
+          },
+        });
+      },
+      { type: 'info', confirmText: 'Restaurar' },
+    );
+  }
+
   handleTransactionClick(transaction: MonthlyTransaction): void {
     if (this.uiService.isGroupingMode()) {
       // No modo de agrupamento, apenas despesas podem ser selecionadas
@@ -145,7 +183,7 @@ export class DashboardComponent {
     // Aceitar ambos os formatos (camelCase da API e snake_case do modelo)
     const is_installment = monthlyTx.isInstallment ?? monthlyTx.is_installment ?? false;
     const is_recurrent = monthlyTx.isRecurrent ?? monthlyTx.is_recurrent ?? false;
-    
+
     const transaction: Partial<Transaction> = {
       id: monthlyTx.id,
       description: monthlyTx.description,
@@ -162,21 +200,84 @@ export class DashboardComponent {
   }
 
   onDelete(transaction: MonthlyTransaction) {
-    if (
-      confirm(
-        'Tem certeza que deseja excluir este lançamento? Se for um parcelamento, a transação original e todas as parcelas futuras serão removidas.',
-      )
-    ) {
-      this.deletingId.set(transaction.id);
-      this.dataService
-        .deleteTransaction(transaction.id)
-        .pipe(finalize(() => this.deletingId.set(null)))
-        .subscribe({
-          next: () => {
-            this.dataService.fetchMonthlyView(this.currentDate()).subscribe();
-            this.dataService.refreshInstallmentPlans().subscribe();
-          },
-        });
+    this.uiService.openConfirmModal(
+      'Excluir Lançamento',
+      'Tem certeza que deseja excluir este lançamento? Se for um parcelamento, a transação original e todas as parcelas futuras serão removidas.',
+      () => {
+        this.deletingId.set(transaction.id);
+        this.dataService
+          .deleteTransaction(transaction.id)
+          .pipe(finalize(() => this.deletingId.set(null)))
+          .subscribe({
+            next: () => {
+              this.dataService.fetchMonthlyView(this.currentDate()).subscribe();
+              this.dataService.refreshInstallmentPlans().subscribe();
+            },
+          });
+      },
+      { type: 'danger', confirmText: 'Confirmar Exclusão' },
+    );
+  }
+
+  toggleExclusionMode(): void {
+    this.uiService.toggleExclusionMode();
+  }
+
+  confirmExclusion(): void {
+    const selectedIds = Array.from(this.uiService.selectedTransactions());
+
+    if (selectedIds.length === 0) {
+      this.dataService['notificationService'].show('Selecione pelo menos uma conta.', 'error');
+      return;
+    }
+
+    this.uiService.openExclusionModal();
+  }
+
+  onTogglePayment(transaction: MonthlyTransaction) {
+    const parentId = transaction.parent_id || transaction.parentId || transaction.id;
+    const currentPaid = transaction.paid_installments ?? 0;
+    const clickedInstallment = transaction.installment_number ?? 1;
+
+    // Se já está pago, o clique no botão de "check" pode significar estorno (voltar para a anterior)
+    if (transaction.status === 'PAID') {
+      this.uiService.openConfirmModal(
+        'Estornar Pagamento',
+        'Deseja estornar o pagamento deste mês? O contador de parcelas pagas será reduzido.',
+        () => {
+          this.dataService.updatePayment(parentId, clickedInstallment - 1).subscribe({
+            next: () => this.dataService.fetchMonthlyView(this.currentDate()).subscribe(),
+          });
+        },
+        { type: 'warning', confirmText: 'Sim, Estornar' },
+      );
+      return;
+    }
+
+    const processPayment = () => {
+      this.dataService.updatePayment(parentId, clickedInstallment).subscribe({
+        next: () => {
+          this.dataService.fetchMonthlyView(this.currentDate()).subscribe();
+        },
+      });
+    };
+
+    // Lógica do Alerta de Salto
+    if (clickedInstallment > currentPaid + 1) {
+      this.uiService.openConfirmModal(
+        'Atenção: Salto de Parcelas',
+        'Existem meses anteriores em atraso ou pendentes para esta conta. Ao confirmar o pagamento deste mês, todos os meses anteriores também serão marcados como pagos. Deseja continuar?',
+        processPayment,
+        { type: 'danger', confirmText: 'Confirmar Pagamento' },
+      );
+    } else {
+      // Confirmação simples para pagamento comum
+      this.uiService.openConfirmModal(
+        'Confirmar Pagamento',
+        `Deseja marcar o pagamento da parcela ${clickedInstallment} como concluído?`,
+        processPayment,
+        { type: 'info', confirmText: 'Marcar como Pago' },
+      );
     }
   }
 }
