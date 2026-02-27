@@ -5,6 +5,7 @@ import {
   FinancialCategory,
   InstallmentPlan,
   MonthlyView,
+  MonthlyTransaction,
 } from '../models/transaction.model';
 import { Observable, tap, forkJoin, throwError } from 'rxjs';
 // FIX: Import `map` operator from rxjs.
@@ -258,7 +259,21 @@ export class DataService {
   triggerInstallmentsNavigation() {
     this._navigateToInstallments.set(true);
   }
+
   resetInstallmentsNavigation() {
     this._navigateToInstallments.set(false);
+  }
+
+  /**
+   * Atualiza localmente uma transação na visão mensal atual para feedback imediato na UI.
+   */
+  patchMonthlyTransaction(id: string, updates: Partial<MonthlyTransaction>) {
+    this.monthlyView.update((view) => {
+      if (!view) return null;
+      return {
+        ...view,
+        transactions: view.transactions.map((t) => (t.id === id ? { ...t, ...updates } : t)),
+      };
+    });
   }
 }

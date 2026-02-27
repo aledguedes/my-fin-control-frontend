@@ -59,6 +59,10 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
     return (data as any)?.isRecurrent === true || data?.is_recurrent === true;
   }
 
+  isReadOnly(): boolean {
+    return this.transactionToEdit()?.status === 'PAID';
+  }
+
   // Checkbox de parcelado deve estar desabilitado se:
   // 1. É edição E já é parcelada (não pode mudar status)
   // 2. É recorrente (nunca pode ser parcelada)
@@ -200,6 +204,11 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
         paid_installments: [data?.installments?.paid_installments ?? 0],
       }),
     });
+
+    if (this.isReadOnly()) {
+      this.transactionForm.disable();
+    }
+
     this.setupFormListeners();
     // Initial validation state update
     if (is_recurrent) {
