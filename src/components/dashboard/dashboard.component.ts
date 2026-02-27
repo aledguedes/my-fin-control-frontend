@@ -42,8 +42,8 @@ export class DashboardComponent {
     return this.showAllExpenses() ? sorted : sorted.slice(0, 3);
   });
 
-  // Displayed transactions (limited or all)
-  displayedTransactions = computed(() => {
+  // Versão filtrada mas não limitada dos lançamentos
+  filteredTransactions = computed(() => {
     const view = this.dataService.currentMonthlyView();
     if (!view) return [];
 
@@ -59,6 +59,12 @@ export class DashboardComponent {
       transactions = transactions.filter((t) => t.is_recurrent || t.isRecurrent);
     }
 
+    return transactions;
+  });
+
+  // Lançamentos exibidos (limitados ou todos)
+  displayedTransactions = computed(() => {
+    const transactions = this.filteredTransactions();
     return this.showAllTransactions() ? transactions : transactions.slice(0, 5);
   });
 
