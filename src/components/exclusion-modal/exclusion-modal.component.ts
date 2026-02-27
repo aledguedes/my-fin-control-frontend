@@ -379,7 +379,11 @@ export class ExclusionModalComponent {
       next: () => {
         const view = this.dataService.currentMonthlyView();
         if (view) {
-          // Trigger refresh if needed
+          // Refrescar os dados do dashboard para atualizar os cards de resumo
+          const dashboardDate = new Date(view.year, view.month - 1, 1);
+          this.dataService
+            .fetchMonthlyView(dashboardDate, this.uiService.showHiddenItems())
+            .subscribe();
         }
         this.uiService.toggleExclusionMode();
         this.uiService.closeExclusionModal();

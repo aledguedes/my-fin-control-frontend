@@ -216,7 +216,9 @@ export class DashboardComponent {
           .pipe(finalize(() => this.deletingId.set(null)))
           .subscribe({
             next: () => {
-              this.dataService.fetchMonthlyView(this.currentDate()).subscribe();
+              this.dataService
+                .fetchMonthlyView(this.currentDate(), this.uiService.showHiddenItems())
+                .subscribe();
               this.dataService.refreshInstallmentPlans().subscribe();
             },
           });
@@ -244,6 +246,7 @@ export class DashboardComponent {
     const parentId = transaction.parent_id || transaction.parentId || transaction.id;
     const currentPaid = transaction.paid_installments ?? 0;
     const clickedInstallment = transaction.installment_number ?? 1;
+    const today = new Date().toISOString().split('T')[0];
 
     // Se já está pago, o clique no botão de "check" pode significar estorno (voltar para a anterior)
     if (transaction.status === 'PAID') {
@@ -251,8 +254,20 @@ export class DashboardComponent {
         'Estornar Pagamento',
         'Deseja estornar o pagamento deste mês? O contador de parcelas pagas será reduzido.',
         () => {
-          this.dataService.updatePayment(parentId, clickedInstallment - 1).subscribe({
-            next: () => this.dataService.fetchMonthlyView(this.currentDate()).subscribe(),
+          const newPaidCount = clickedInstallment - 1;
+          this.dataService.updatePayment(parentId, newPaidCount).subscribe({
+            next: () => {
+              // Feedback visual imediato
+              const fallbackStatus = transaction.date < today ? 'OVERDUE' : 'UPCOMING';
+              this.dataService.patchMonthlyTransaction(transaction.id, {
+                status: fallbackStatus,
+                paid_installments: newPaidCount,
+              });
+              // Refresh silêncioso para garantir consistência total
+              this.dataService
+                .fetchMonthlyView(this.currentDate(), this.uiService.showHiddenItems())
+                .subscribe();
+            },
           });
         },
         { type: 'warning', confirmText: 'Sim, Estornar' },
@@ -263,7 +278,15 @@ export class DashboardComponent {
     const processPayment = () => {
       this.dataService.updatePayment(parentId, clickedInstallment).subscribe({
         next: () => {
-          this.dataService.fetchMonthlyView(this.currentDate()).subscribe();
+          // Feedback visual imediato
+          this.dataService.patchMonthlyTransaction(transaction.id, {
+            status: 'PAID',
+            paid_installments: clickedInstallment,
+          });
+          // Refresh background
+          this.dataService
+            .fetchMonthlyView(this.currentDate(), this.uiService.showHiddenItems())
+            .subscribe();
         },
       });
     };
