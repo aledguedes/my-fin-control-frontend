@@ -105,6 +105,19 @@ export class ShoppingService {
       );
   }
 
+  duplicateList(name: string, baseListId: string): Observable<ShoppingList> {
+    return this.http
+      .post<ShoppingList>(`${this.apiUrl}/lists/duplicate`, { name, baseListId })
+      .pipe(
+        tap((newList) => {
+          // Invalidar cache de listas
+          this.cacheService.clearByPattern('/shopping/lists');
+          this.shoppingLists.update((lists) => [...lists, newList]);
+          this.notificationService.show('Lista duplicada com sucesso!', 'success');
+        }),
+      );
+  }
+
   setActiveList(listId: string | null): void {
     if (!listId) {
       this.activeListId.set(null);
