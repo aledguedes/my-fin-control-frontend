@@ -55,6 +55,7 @@ export class ShoppingHomeComponent implements OnInit {
 
   // Loading states
   loadingAction = signal<string | null>(null); // e.g., 'create-list', 'delete-list-ID', 'add-category'
+  baseListToDuplicate = signal<ShoppingList | null>(null);
 
   createListForm!: FormGroup;
   categoryForm!: FormGroup;
@@ -102,7 +103,10 @@ export class ShoppingHomeComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.createListForm = this.fb.group({ name: ['', Validators.required] });
+    this.createListForm = this.fb.group({
+      name: ['', Validators.required],
+      baseListId: [null],
+    });
     this.categoryForm = this.fb.group({ name: ['', Validators.required] });
     this.productForm = this.fb.group({
       name: ['', Validators.required],
@@ -118,14 +122,27 @@ export class ShoppingHomeComponent implements OnInit {
     });
   }
 
-  openCreateListModal(): void {
+  openCreateListModal(baseList?: ShoppingList): void {
     this.preSelectedProductIds.set([]);
+    this.baseListToDuplicate.set(baseList || null);
+
+    if (baseList) {
+      this.createListForm.setValue({
+        name: baseList.name,
+        baseListId: baseList.id,
+      });
+    } else {
+      this.createListForm.reset({ name: '', baseListId: null });
+    }
+
     this.isCreateListModalOpen.set(true);
   }
 
   closeCreateListModal(): void {
     this.isCreateListModalOpen.set(false);
     this.preSelectedProductIds.set([]);
+    this.baseListToDuplicate.set(null);
+    this.createListForm.reset();
   }
 
   togglePreselectedProduct(productId: string): void {
@@ -183,17 +200,19 @@ export class ShoppingHomeComponent implements OnInit {
   createList(): void {
     if (this.createListForm.invalid) return;
     this.loadingAction.set('create-list');
-    const listName = this.createListForm.value.name;
+    const { name: listName, baseListId } = this.createListForm.value;
     const initialItems = this.preSelectedProductIds();
+    const baseListToUseId = this.baseListToDuplicate()?.id || baseListId;
 
-    this.shoppingService
-      .createList(listName, initialItems)
-      .pipe(finalize(() => this.loadingAction.set(null)))
-      .subscribe((newList) => {
-        this.shoppingService.setActiveList(newList.id);
-        this.createListForm.reset();
-        this.closeCreateListModal();
-      });
+    const request$ = baseListToUseId
+      ? this.shoppingService.duplicateList(listName, baseListToUseId)
+      : this.shoppingService.createList(listName, initialItems);
+
+    request$.pipe(finalize(() => this.loadingAction.set(null))).subscribe((newList) => {
+      this.shoppingService.setActiveList(newList.id);
+      this.createListForm.reset();
+      this.closeCreateListModal();
+    });
   }
 
   deleteList(listId: string): void {
