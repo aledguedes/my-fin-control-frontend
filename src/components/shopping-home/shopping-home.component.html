@@ -96,58 +96,102 @@
                   <li
                     class="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                   >
-                    <div class="flex-grow">
-                      <p class="font-semibold text-neutral-800">{{ list.name }}</p>
+                    <div class="flex-grow flex flex-col">
+                      <div class="flex items-center justify-between sm:justify-start sm:gap-3">
+                        <p class="font-semibold text-neutral-800">{{ list.name }}</p>
+                        @if (list.status === 'completed') {
+                          <span
+                            class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase tracking-wider"
+                          >
+                            Finalizada
+                          </span>
+                        } @else {
+                          <span
+                            class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full uppercase tracking-wider"
+                          >
+                            Pendente
+                          </span>
+                        }
+                      </div>
                       <p class="text-sm text-neutral-500">
                         @if (list.status === 'completed') {
-                          Finalizada em: {{ list.completed_at | date: 'dd/MM/yyyy' }}
+                          {{ list.completed_at | date: 'dd/MM/yyyy' }}
                         } @else {
-                          Criada em: {{ list.created_at | date: 'dd/MM/yyyy' }}
+                          {{ list.created_at | date: 'dd/MM/yyyy' }}
                         }
                       </p>
                     </div>
-                    <div class="flex items-center gap-4 w-full sm:w-auto">
+
+                    <div
+                      class="flex items-center w-full sm:w-auto gap-4"
+                      [class.justify-between]="list.status === 'completed'"
+                      [class.justify-end]="list.status !== 'completed'"
+                    >
                       @if (list.status === 'completed') {
-                        <span
-                          class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full whitespace-nowrap"
-                        >
-                          Finalizada
-                        </span>
-                        <p class="font-bold text-neutral-700 flex-grow text-right">
+                        <p class="font-bold text-neutral-700 text-lg">
                           R$ {{ list.total_amount | number: '1.2-2' : 'pt' }}
                         </p>
-                      } @else {
-                        <span
-                          class="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full whitespace-nowrap"
-                        >
-                          Pendente
-                        </span>
                       }
 
-                      <div class="flex items-center gap-2">
+                      <div class="flex items-center gap-1">
                         @if (list.status === 'pending') {
                           <button
                             (click)="selectList(list.id)"
-                            class="py-2 px-4 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium"
+                            class="p-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-sm"
+                            title="Abrir lista"
                           >
-                            Abrir
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-5 w-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
                           </button>
                         }
                         @if (list.status === 'completed') {
                           <button
                             (click)="openInvoiceModal(list)"
-                            class="py-2 px-4 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition-colors text-sm font-medium"
+                            class="p-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm"
+                            title="Ver Fatura"
                           >
-                            Ver Fatura
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-5 w-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
                           </button>
 
                           <button
                             (click)="openCreateListModal(list)"
-                            class="py-2 px-4 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors text-sm font-medium flex items-center gap-2"
+                            class="p-2 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-colors shadow-sm"
+                            title="Repetir lista"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              class="h-4 w-4"
+                              class="h-5 w-5"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -159,14 +203,13 @@
                                 d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
                               />
                             </svg>
-                            Repetir
                           </button>
                         }
                         <button
                           (click)="deleteList(list.id)"
                           [disabled]="loadingAction() === 'delete-list-' + list.id"
                           class="p-2 rounded-md text-rose-500 hover:bg-rose-100 transition-colors disabled:opacity-50"
-                          aria-label="Excluir lista"
+                          title="Excluir lista"
                         >
                           @if (loadingAction() === 'delete-list-' + list.id) {
                             <svg
@@ -695,7 +738,7 @@
                     <option [ngValue]="null">Nova lista vazia</option>
                     @for (list of sortedShoppingLists(); track list.id) {
                       <option [value]="list.id">
-                        {{ list.name }} ({{ (list.completed_at || list.created_at) | date: 'dd/MM' }})
+                        {{ list.name }} ({{ list.completed_at || list.created_at | date: 'dd/MM' }})
                       </option>
                     }
                   </select>
