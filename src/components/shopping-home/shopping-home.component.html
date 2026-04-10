@@ -87,14 +87,16 @@
 
           <!-- Unified Shopping Lists -->
           <div class="bg-white rounded-lg shadow-md">
-            <div class="p-4 border-b border-neutral-200">
+            <div class="p-4 border-b border-neutral-200 bg-neutral-50">
               <h3 class="text-lg font-semibold text-neutral-700">Minhas Listas de Compras</h3>
             </div>
             @if (sortedShoppingLists().length > 0) {
               <ul class="divide-y divide-neutral-200">
                 @for (list of sortedShoppingLists(); track list.id) {
                   <li
-                    class="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                    class="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-l-[3px] border-solid"
+                    [class.border-green-500]="list.status === 'completed'"
+                    [class.border-blue-500]="list.status === 'pending'"
                   >
                     <div class="flex-grow flex flex-col">
                       <div class="flex items-center justify-between sm:justify-start sm:gap-3">
