@@ -239,6 +239,10 @@
                   <span class="text-gray-600">Subtotal</span>
                   <span class="font-medium text-gray-800">R$ {{ formattedSubtotal() }}</span>
                 </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Valor médio por item</span>
+                  <span class="font-medium text-gray-800">R$ {{ averagePrice() }}</span>
+                </div>
                 <div class="flex justify-between text-lg font-bold border-t border-gray-300 pt-2">
                   <span class="text-gray-800">Total</span>
                   <span class="text-emerald-500">R$ {{ formattedTotal() }}</span>

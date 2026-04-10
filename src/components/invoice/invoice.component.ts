@@ -40,6 +40,13 @@ export class InvoiceComponent implements OnInit {
   private router = inject(Router);
   private shoppingService = inject(ShoppingService);
 
+  averagePrice = computed(() => {
+    const data = this.invoiceData();
+    if (!data) return 0;
+    const itensFiltered = data.items.filter((item) => item.price > 0);
+    return Number(data.total_amount / itensFiltered.length).toFixed(2);
+  });
+
   listId = signal<string | null>(null);
   isLoading = signal<boolean>(true);
 
@@ -82,15 +89,17 @@ export class InvoiceComponent implements OnInit {
   invoiceItems = computed<InvoiceItem[]>(() => {
     const data = this.invoiceData();
     if (!data) return [];
-    return data.items.map((item) => ({
-      id: item.id,
-      productName: item.product_name || item.name,
-      categoryName: item.category_name || '',
-      quantity: item.quantity,
-      price: item.price,
-      unit: item.unit,
-      total: item.quantity * item.price,
-    }));
+    return data.items
+      .filter((item) => item.price > 0)
+      .map((item) => ({
+        id: item.id,
+        productName: item.product_name || item.name,
+        categoryName: item.category_name || '',
+        quantity: item.quantity,
+        price: item.price,
+        unit: item.unit,
+        total: item.quantity * item.price,
+      }));
   });
 
   invoiceId = computed(() => {

@@ -84,8 +84,42 @@
         }
       </div>
 
-      <!-- Right Side: Total and Action -->
+      <!-- Right Side: Sync Status + Total + Action -->
       <div class="flex items-center justify-between w-full sm:w-auto gap-4">
+        <!-- Sync Status Badge -->
+        @switch (syncStatus()) {
+          @case ('pending') {
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5 select-none" title="Alterações aguardando envio...">
+              <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+              Salvando...
+            </span>
+          }
+          @case ('syncing') {
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full px-2 py-0.5 select-none" title="Sincronizando com o servidor...">
+              <svg class="animate-spin h-3 w-3 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              Sincronizando
+            </span>
+          }
+          @case ('error') {
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5 select-none" title="Falha ao sincronizar. Dados salvos localmente.">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              Sem sync
+            </span>
+          }
+          @default {
+            <!-- 'synced': ícone discreto sem texto -->
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 select-none" title="Sincronizado com o servidor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.293 4.293a1 1 0 011.414 1.414l-9 9a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l8.293-8.293z" clip-rule="evenodd" />
+              </svg>
+            </span>
+          }
+        }
         <div>
           <span class="text-neutral-500 text-sm font-medium uppercase tracking-wide"> Total: </span>
           <span class="text-xl font-bold text-neutral-800 ml-2">
