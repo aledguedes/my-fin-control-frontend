@@ -31,6 +31,7 @@ export class DashboardComponent {
   deletingId = signal<string | null>(null);
   showAllExpenses = signal(false);
   showAllTransactions = signal(false);
+  transactionTypeFilter = signal<'all' | 'expense' | 'revenue'>('expense');
 
   // Top expenses (sorted by amount, limited to 3)
   topExpenses = computed(() => {
@@ -48,6 +49,11 @@ export class DashboardComponent {
     if (!view) return [];
 
     let transactions = view.transactions;
+
+    // Filtro por tipo (Todos, Despesas, Receitas)
+    if (this.transactionTypeFilter() !== 'all') {
+      transactions = transactions.filter((t) => t.type === this.transactionTypeFilter());
+    }
 
     // Se o modo de agrupamento estiver ativo, mostrar apenas despesas
     if (this.uiService.isGroupingMode()) {
@@ -142,6 +148,11 @@ export class DashboardComponent {
     this.showAllTransactions.update((v) => !v);
   }
 
+  setTransactionFilter(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value as 'all' | 'expense' | 'revenue';
+    this.transactionTypeFilter.set(value);
+  }
+
   toggleGroupingMode(): void {
     this.uiService.toggleGroupingMode();
   }
@@ -201,6 +212,7 @@ export class DashboardComponent {
       is_recurrent: is_recurrent,
       payment_method: monthlyTx.payment_method,
       total_installments: monthlyTx.total_installments,
+      status: monthlyTx.status,
     };
     this.uiService.openTransactionModal(transaction);
   }
