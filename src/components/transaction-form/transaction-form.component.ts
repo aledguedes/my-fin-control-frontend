@@ -155,6 +155,7 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
       ],
       is_installment: [is_installment],
       is_recurrent: [is_recurrent],
+      update_scope: ['single'], // Default to single
       recurrence_start_date: [data?.recurrence_start_date ?? null],
       installments: this.fb.group({
         installmentAmount: [
@@ -278,6 +279,7 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
       payment_method: formValue.payment_method,
       is_installment: formValue.is_installment,
       is_recurrent: formValue.is_recurrent,
+      update_scope: formValue.is_recurrent ? formValue.update_scope : undefined,
       // Map recurrence_start_date to model property (assuming model uses camelCase or I can add the snake_case one)
       recurrence_start_date: formValue.is_recurrent ? formValue.recurrence_start_date : undefined,
 

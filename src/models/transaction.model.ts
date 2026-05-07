@@ -24,6 +24,8 @@ export interface InstallmentDetails {
   start_date: string; // YYYY-MM-DD
 }
 
+export type UpdateScope = 'single' | 'future' | 'all';
+
 export interface Transaction {
   id: string;
   type: 'revenue' | 'expense';
@@ -43,6 +45,13 @@ export interface Transaction {
   start_date?: string;
   paid_installments?: number;
   status?: 'PAID' | 'UPCOMING' | 'OVERDUE';
+
+  // NOVOS CAMPOS (Metadados de Interface)
+  isVirtual?: boolean;    // true se for uma projeção automática (não existe fisicamente no banco)
+  isException?: boolean;  // true se for uma edição manual que sobrescreveu uma recorrência
+  hasHistory?: boolean;   // true se a conta já teve alterações de valor no passado
+  isHidden?: boolean;     // true se o mês foi marcado como oculto/excluído
+  update_scope?: UpdateScope;
 }
 
 // This is a derived model, not stored directly. Represents one installment payment.
@@ -96,6 +105,9 @@ export interface MonthlyTransaction {
   paid_installments?: number;
   paidInstallments?: number;
   isHidden?: boolean;
+  isVirtual?: boolean;
+  isException?: boolean;
+  hasHistory?: boolean;
 }
 
 export interface MonthlyView {
