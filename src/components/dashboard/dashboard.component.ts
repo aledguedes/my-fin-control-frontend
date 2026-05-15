@@ -91,6 +91,16 @@ export class DashboardComponent {
     return selectedTransactions.reduce((sum, t) => sum + t.amount, 0);
   });
 
+  // Valor total das contas pagas no mês atual
+  paidTransactionsAmount = computed(() => {
+    const view = this.dataService.currentMonthlyView();
+    if (!view) return 0;
+
+    return view.transactions
+      .filter((t) => t.status === 'PAID')
+      .reduce((sum, t) => sum + t.amount, 0);
+  });
+
   // Quantidade de transações recorrentes selecionadas para exclusão
   exclusionCount = computed(() => {
     if (!this.uiService.isExclusionMode()) {

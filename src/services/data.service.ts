@@ -87,6 +87,9 @@ export class DataService {
               ...tx,
               status,
               isHidden: tx.isHidden ?? false,
+              isVirtual: tx.isVirtual ?? false,
+              isException: tx.isException ?? false,
+              hasHistory: tx.hasHistory ?? false,
               is_installment: tx.isInstallment ?? tx.is_installment ?? false,
               is_recurrent: tx.isRecurrent ?? tx.is_recurrent ?? false,
               installment_number: tx.installment_number ?? tx.installmentNumber,
@@ -122,8 +125,15 @@ export class DataService {
 
   updateTransaction(transaction: Transaction): Observable<Transaction> {
     console.log('UPDATE TRANSACTION', transaction);
+    
+    // Se o ID contiver _inst_, extrair apenas o UUID (ID da recorrência pai ou plano)
+    let cleanId = transaction.id;
+    if (cleanId.includes('_inst_')) {
+      cleanId = cleanId.split('_inst_')[0];
+    }
+
     return this.http
-      .put<Transaction>(`${this.apiUrl}/transactions/${transaction.id}`, transaction)
+      .put<Transaction>(`${this.apiUrl}/transactions/${cleanId}`, transaction)
       .pipe(
         tap(() => {
           // Invalidar cache relacionado
