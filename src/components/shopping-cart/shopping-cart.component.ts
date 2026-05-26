@@ -175,7 +175,7 @@ export class ShoppingCartComponent {
     // 4. Evento crítico: sync ao destruir o componente (usuário sai da tela)
     this.destroyRef.onDestroy(() => {
       const currentList = this.localList();
-      if (currentList && currentList.status === 'pending' && this.syncStatus() !== 'synced') {
+      if (!this.isFinishing && currentList && currentList.status === 'pending' && this.syncStatus() !== 'synced') {
         this.shoppingService.syncList(currentList, false).subscribe();
       }
     });
@@ -382,6 +382,7 @@ export class ShoppingCartComponent {
   }
 
   isCompletionModalOpen = signal(false);
+  isFinishing = false; // Flag para evitar sync duplicado no onDestroy
 
   onCompletePurchase(): void {
     if (this.total() > 0) {
@@ -395,6 +396,8 @@ export class ShoppingCartComponent {
       this.isCompletionModalOpen.set(false);
       return;
     }
+
+    this.isFinishing = true;
 
     // Evento crítico: garante sync antes de finalizar
     // Se já está sincronizado, emite diretamente; caso contrário, sincroniza primeiro
@@ -412,6 +415,7 @@ export class ShoppingCartComponent {
         },
         error: () => {
           this.syncStatus.set('error');
+          this.isFinishing = false;
           // Mesmo com erro de sync, permite finalizar (dados locais são a fonte de verdade)
           this.completePurchase.emit(list);
           this.isCompletionModalOpen.set(false);
