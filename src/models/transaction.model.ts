@@ -108,6 +108,8 @@ export interface MonthlyTransaction {
   isVirtual?: boolean;
   isException?: boolean;
   hasHistory?: boolean;
+  start_date?: string;             // data de início das parcelas (parceladas)
+  recurrence_start_date?: string;  // data de início da recorrência (recorrentes)
 }
 
 export interface MonthlyView {

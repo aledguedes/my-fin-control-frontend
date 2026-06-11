@@ -156,7 +156,7 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
       is_installment: [is_installment],
       is_recurrent: [is_recurrent],
       update_scope: ['single'], // Default to single
-      recurrence_start_date: [data?.recurrence_start_date ?? null],
+      recurrence_start_date: [data?.recurrence_start_date ?? (data as any)?.recurrence_start_date ?? null],
       installments: this.fb.group({
         installmentAmount: [
           is_installment && data?.amount && data.installments?.total_installments
@@ -168,7 +168,7 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
           data?.installments?.total_installments ?? 2,
           is_installment ? [Validators.required, Validators.min(2)] : null,
         ],
-        start_date: [data?.installments?.start_date ?? new Date().toISOString().split('T')[0]],
+        start_date: [data?.installments?.start_date ?? (data as any)?.start_date ?? new Date().toISOString().split('T')[0]],
         paid_installments: [data?.installments?.paid_installments ?? 0],
       }),
     });

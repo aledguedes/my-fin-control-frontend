@@ -223,6 +223,8 @@ export class DashboardComponent {
       payment_method: monthlyTx.payment_method,
       total_installments: monthlyTx.total_installments,
       status: monthlyTx.status,
+      recurrence_start_date: monthlyTx.recurrence_start_date,
+      start_date: monthlyTx.start_date,
     };
     this.uiService.openTransactionModal(transaction);
   }
