@@ -96,12 +96,8 @@ export class ShoppingCartComponent {
         try {
           const parsedDraft: ShoppingList = JSON.parse(savedDraft);
 
-          const draftTime = parsedDraft.updated_at
-            ? new Date(parsedDraft.updated_at).getTime()
-            : 0;
-          const serverTime = activeList.updated_at
-            ? new Date(activeList.updated_at).getTime()
-            : 0;
+          const draftTime = parsedDraft.updated_at ? new Date(parsedDraft.updated_at).getTime() : 0;
+          const serverTime = activeList.updated_at ? new Date(activeList.updated_at).getTime() : 0;
 
           if (draftTime >= serverTime) {
             // Draft local é mais recente (ou igual) → usa o draft
@@ -119,7 +115,10 @@ export class ShoppingCartComponent {
             this.syncStatus.set('synced');
           }
         } catch (e) {
-          console.error('[ShoppingCart] Falha ao parsear draft local. Usando versão do servidor.', e);
+          console.error(
+            '[ShoppingCart] Falha ao parsear draft local. Usando versão do servidor.',
+            e,
+          );
           localStorage.removeItem(`shopping_list_draft_${activeList.id}`);
           this.localList.set(JSON.parse(JSON.stringify(activeList)));
           this.syncStatus.set('synced');
@@ -132,10 +131,7 @@ export class ShoppingCartComponent {
     // 1. Persiste imediatamente no localStorage (sem atraso)
     // 2. Após 2s de inatividade, envia snapshot completo ao backend
     toObservable(this.localList)
-      .pipe(
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef),
-      )
+      .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((currentList) => {
         if (currentList && currentList.status === 'pending') {
           // Persiste draft local SEMPRE (sem delay)
@@ -175,7 +171,12 @@ export class ShoppingCartComponent {
     // 4. Evento crítico: sync ao destruir o componente (usuário sai da tela)
     this.destroyRef.onDestroy(() => {
       const currentList = this.localList();
-      if (!this.isFinishing && currentList && currentList.status === 'pending' && this.syncStatus() !== 'synced') {
+      if (
+        !this.isFinishing &&
+        currentList &&
+        currentList.status === 'pending' &&
+        this.syncStatus() !== 'synced'
+      ) {
         this.shoppingService.syncList(currentList, false).subscribe();
       }
     });
@@ -428,7 +429,7 @@ export class ShoppingCartComponent {
     this.isCompletionModalOpen.set(false);
   }
 
-  trackById(index: number, item: ShoppingListItem | Product): string {
+  trackById(item: ShoppingListItem | Product): string {
     return item.id;
   }
 }
